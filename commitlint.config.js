@@ -5,7 +5,6 @@ module.exports = {
       2,
       'always',
       [
-        'setting',
         'feat',
         'fix',
         'style',
@@ -19,6 +18,5 @@ module.exports = {
         'setting',
       ],
     ],
-    'type-case': [2, 'always', 'lower-case'],
   },
 };
