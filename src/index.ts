@@ -4,7 +4,7 @@ export type NextFetchDefaultOptions = {
    *
    * @public
    */
-  baseUrl?: string | URL;
+  baseURL?: string | URL;
   /**
    * Defatul Headers of fetch. It will be used when the headers attribute does not exist in the optional object
    *
