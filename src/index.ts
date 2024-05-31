@@ -43,11 +43,52 @@ export type NextFetchDefaultOptions = {
   requestInterceptor?: (responseArg: ResponseInit) => Promise<ResponseInit>;
 };
 
+/**
+ * Arguments of fetch function.
+ *
+ * @throws {Error} if a first argument of fetch is `Request` object. only string and URL are supported.
+ *
+ * @public
+ */
+export type FetchArgs = [string | URL, RequestInit | undefined];
+
+const applyDefaultOptionsArgs = (
+  [url, requestInit]: FetchArgs,
+  defaultOptions?: NextFetchDefaultOptions,
+): FetchArgs => {
+  const returnUrl: FetchArgs[0] = defaultOptions?.baseUrl
+    ? new URL(url, defaultOptions.baseUrl)
+    : url;
+
+  const headers = new Headers({
+    ...defaultOptions?.headers,
+    ...requestInit?.headers,
+  });
+
+  return [
+    returnUrl,
+    {
+      ...requestInit,
+      headers,
+    },
+  ];
+};
+
 export const nextFetch = {
-  create: (defaultOptions: NextFetchDefaultOptions) => {
+  create: (defaultOptions?: NextFetchDefaultOptions) => {
     const instance = {
-      get(): any {
-        // default options를 가지고 options 만들기
+      async get(
+        url: string | URL,
+        ...args: Parameters<typeof fetch>
+      ): Promise<Response | any> {
+        // 개발 진행 중이므로 any타입을 임의로 추가
+
+        // default options를 적용한 args 생성
+        const defaultOptionAppliedArgs = applyDefaultOptionsArgs(
+          [url, args[1]],
+          defaultOptions,
+        );
+
         // request interceptor 실행
         // 요청
         // response interceptor 실행
