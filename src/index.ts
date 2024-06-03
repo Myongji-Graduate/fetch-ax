@@ -79,7 +79,7 @@ export const nextFetch = {
     const instance = {
       async get(
         url: string | URL,
-        ...args: Parameters<typeof fetch>
+        args: Parameters<typeof fetch>,
       ): Promise<Response | any> {
         // 개발 진행 중이므로 any타입을 임의로 추가
 
