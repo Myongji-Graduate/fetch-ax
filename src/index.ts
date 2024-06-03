@@ -56,20 +56,20 @@ const applyDefaultOptionsArgs = (
   [url, requestInit]: FetchArgs,
   defaultOptions?: NextFetchDefaultOptions,
 ): FetchArgs => {
-  const returnUrl: FetchArgs[0] = defaultOptions?.baseUrl
+  const requestUrl: FetchArgs[0] = defaultOptions?.baseUrl
     ? new URL(url, defaultOptions.baseUrl)
     : url;
 
-  const headers = new Headers({
+  const requestHeaders = new Headers({
     ...defaultOptions?.headers,
     ...requestInit?.headers,
   });
 
   return [
-    returnUrl,
+    requestUrl,
     {
       ...requestInit,
-      headers,
+      headers: requestHeaders,
     },
   ];
 };
@@ -84,7 +84,7 @@ export const nextFetch = {
         // 개발 진행 중이므로 any타입을 임의로 추가
 
         // default options를 적용한 args 생성
-        const defaultOptionAppliedArgs = applyDefaultOptionsArgs(
+        const requestArgs = applyDefaultOptionsArgs(
           [url, args[1]],
           defaultOptions,
         );
