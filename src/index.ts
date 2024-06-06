@@ -106,6 +106,7 @@ export const nextFetch = {
           method: 'get',
         }); // 수정 필요 현재는 response interceptor을 위한 임의 값
 
+        httpErrorHandling(response);
         if (requestArgs.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         } // interceptor 실행
