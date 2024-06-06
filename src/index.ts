@@ -14,18 +14,21 @@
 // };
 
 export type NextFetchResponse<T = any> = {
-  data: T;
+  data: ResponseDataType<T>;
   status: number;
   statusText: string;
   headers: Headers;
 };
 
-interface NextFetchRequestInit<T = any> extends RequestInit {
-  data?: T;
-  throwError?: boolean;
-  responseJson?: boolean;
-  requestJson?: boolean;
-}
+export type ResponseDataType<T> =
+  | ArrayBuffer
+  | String
+  | FormData
+  | Blob
+  | ReadableStream<Uint8Array>
+  | T
+  | null;
+
 export type NextFetchDefaultOptions = {
   /**
    * Base URL of fetch. It will be used when the first argument of fetch is relative URL.
@@ -72,33 +75,60 @@ export type NextFetchDefaultOptions = {
   requestInterceptor?: (requestArg: RequestInit) => Promise<RequestInit>;
 };
 
-// createResponse가 할 일
 const getContentType = (responseHeaders: Headers) => {
-  const header = new Headers(responseHeaders);
-  return header.get('Content-Type') as string; // content-type이 없는 경우를 고려 X
+  return responseHeaders.get('Content-Type') as string; // content-type이 없는 경우를 고려 X ....
 };
-const processResponse = async (
+const processResponse = async <T = any>(
   fetchResponse: Response,
   responseType: NextFetchDefaultOptions['responseType'],
-) => {
+): Promise<NextFetchResponse<T>> => {
   let type = responseType
     ? responseType
     : getContentType(fetchResponse.headers);
 
-  let data: ArrayBuffer | JSON;
+  let data: ResponseDataType<T>;
+  switch (type) {
+    case 'arraybuffer':
+      data = await fetchResponse.arrayBuffer();
+      break;
 
-  // response type을 먼저 확인한다
-  // response type이 없으면 content-type을 확인한다
-  // type을 가지고 data를 가공한 후 반환
+    case 'json':
+      data = await fetchResponse.json();
+      break;
+
+    case 'text':
+      data = await fetchResponse.text();
+      break;
+
+    case 'formdata':
+      data = await fetchResponse.formData();
+      break;
+
+    case 'blob':
+      data = await fetchResponse.blob();
+      break;
+
+    default:
+      data = fetchResponse.body;
+      break;
+    // stream일 때 이게 맞는지?
+  }
+
+  return {
+    data,
+    status: fetchResponse.status,
+    statusText: fetchResponse.statusText,
+    headers: fetchResponse.headers,
+  };
 };
 
 export const nextFetch = {
   create: (defaultOptions?: NextFetchDefaultOptions) => {
     const instance = {
-      async get<T = any>(
+      async get<T>(
         url: string | URL,
         ...args: Parameters<typeof fetch>
-      ): Promise<any> {
+      ): Promise<NextFetchResponse<T>> {
         // default options를 가지고 options 만들기
         let requestArgs: any;
         if (defaultOptions?.requestInterceptor) {
@@ -112,10 +142,12 @@ export const nextFetch = {
           body: requestArgs.data,
         }); // 수정 필요 현재는 response interceptor을 위한 임의 값
 
-        let response = await processResponse(
+        let response = await processResponse<T>(
           fetchResponse,
           requestArgs.responseType,
         );
+
+        return response;
 
         // 요청 값 반환
       },
