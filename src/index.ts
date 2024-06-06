@@ -1,18 +1,3 @@
-// // Prepare the response
-// const responseHeaders = AxiosHeaders.from(
-//   'getAllResponseHeaders' in request && request.getAllResponseHeaders()
-// );
-// const responseData = !responseType || responseType === 'text' || responseType === 'json' ?
-//   request.responseText : request.response;
-// const response = {
-//   data: responseData,
-//   status: request.status,
-//   statusText: request.statusText,
-//   headers: responseHeaders,
-//   config, // AxiosRequestConfig에 header만 추가된 타입
-//   request // axios 공식 문서를 보면 응답을 생성한 요청이라는데 어디에 사용되는지 모르겠음
-// };
-
 export type NextFetchResponse<T = any> = {
   data: ResponseDataType<T>;
   status: number;
@@ -130,12 +115,16 @@ export const nextFetch = {
 
         // 요청에는 먼저 content type을 확인한다
         //
-        const fetchResponse = await fetch(url, {
+        let fetchResponse = await fetch(url, {
           method: 'get',
           body: requestArgs.data,
         }); // 수정 필요 현재는 response interceptor을 위한 임의 값
 
-        let response = await processResponse<T>(
+        if (requestArgs.responseInterceptor) {
+          fetchResponse = await requestArgs.responseInterceptor(fetchResponse);
+        } // interceptor 실행
+
+        const response = await processResponse<T>(
           fetchResponse,
           requestArgs.responseType,
         );
