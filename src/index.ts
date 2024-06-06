@@ -1,18 +1,29 @@
-export type NextFetchResponse<T = any> = {
-  data: ResponseDataType<T>;
+type NextFetchResponse<T extends ResponseType, D = any> = {
+  data: ResponseData<T, D>;
   status: number;
   statusText: string;
   headers: Headers;
 };
 
-export type ResponseDataType<T> =
-  | ArrayBuffer
-  | String
-  | FormData
-  | Blob
-  | ReadableStream<Uint8Array>
-  | T
-  | null;
+type ResponseType =
+  | 'arraybuffer'
+  | 'blob'
+  | 'json'
+  | 'text'
+  | 'stream'
+  | 'formdata';
+
+type ResponseData<T extends ResponseType, D = any> = T extends 'arraybuffer'
+  ? ArrayBuffer
+  : T extends 'blob'
+    ? Blob
+    : T extends 'json'
+      ? D
+      : T extends 'text'
+        ? string
+        : T extends 'formdata'
+          ? FormData
+          : ReadableStream<Uint8Array> | null;
 
 export type NextFetchDefaultOptions = {
   /**
@@ -60,38 +71,37 @@ export type NextFetchDefaultOptions = {
   requestInterceptor?: (requestArg: RequestInit) => Promise<RequestInit>;
 };
 
-const processResponse = async <T = any>(
+const processResponse = async <T extends ResponseType, D = any>(
   fetchResponse: Response,
-  responseType: NextFetchDefaultOptions['responseType'],
-): Promise<NextFetchResponse<T>> => {
-  let data: ResponseDataType<T>;
+  responseType: ResponseType,
+): Promise<NextFetchResponse<T, D>> => {
+  let data: ResponseData<T, D>;
   switch (responseType) {
     case 'arraybuffer':
-      data = await fetchResponse.arrayBuffer();
+      data = (await fetchResponse.arrayBuffer()) as ResponseData<T, D>;
       break;
 
     case 'json':
-      data = await fetchResponse.json();
+      data = (await fetchResponse.json()) as ResponseData<T, D>;
       break;
 
     case 'text':
-      data = await fetchResponse.text();
+      data = (await fetchResponse.text()) as ResponseData<T, D>;
       break;
 
     case 'formdata':
-      data = await fetchResponse.formData();
+      data = (await fetchResponse.formData()) as ResponseData<T, D>;
       break;
 
     case 'blob':
-      data = await fetchResponse.blob();
+      data = (await fetchResponse.blob()) as ResponseData<T, D>;
       break;
 
     default:
-      data = fetchResponse.body;
+      data = fetchResponse.body as ResponseData<T, D>;
       break;
     // stream일 때 이게 맞는지?
   }
-
   return {
     data,
     status: fetchResponse.status,
@@ -103,7 +113,7 @@ const processResponse = async <T = any>(
 export const nextFetch = {
   create: (defaultOptions?: NextFetchDefaultOptions) => {
     const instance = {
-      async get<T>(
+      async get<T extends ResponseType>(
         url: string | URL,
         ...args: Parameters<typeof fetch>
       ): Promise<NextFetchResponse<T>> {
