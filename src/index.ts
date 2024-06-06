@@ -75,19 +75,12 @@ export type NextFetchDefaultOptions = {
   requestInterceptor?: (requestArg: RequestInit) => Promise<RequestInit>;
 };
 
-const getContentType = (responseHeaders: Headers) => {
-  return responseHeaders.get('Content-Type') as string; // content-type이 없는 경우를 고려 X ....
-};
 const processResponse = async <T = any>(
   fetchResponse: Response,
   responseType: NextFetchDefaultOptions['responseType'],
 ): Promise<NextFetchResponse<T>> => {
-  let type = responseType
-    ? responseType
-    : getContentType(fetchResponse.headers);
-
   let data: ResponseDataType<T>;
-  switch (type) {
+  switch (responseType) {
     case 'arraybuffer':
       data = await fetchResponse.arrayBuffer();
       break;
