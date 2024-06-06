@@ -1,5 +1,5 @@
-type NextFetchResponse<T extends ResponseType, D = any> = {
-  data: ResponseData<T, D>;
+type Nextresponse<T = any> = {
+  data: T;
   status: number;
   statusText: string;
   headers: Headers;
@@ -12,18 +12,6 @@ type ResponseType =
   | 'text'
   | 'stream'
   | 'formdata';
-
-type ResponseData<T extends ResponseType, D = any> = T extends 'arraybuffer'
-  ? ArrayBuffer
-  : T extends 'blob'
-    ? Blob
-    : T extends 'json'
-      ? D
-      : T extends 'text'
-        ? string
-        : T extends 'formdata'
-          ? FormData
-          : ReadableStream<Uint8Array> | null;
 
 export type NextFetchDefaultOptions = {
   /**
@@ -55,13 +43,7 @@ export type NextFetchDefaultOptions = {
    *
    * @public
    */
-  responseType?:
-    | 'arraybuffer'
-    | 'blob'
-    | 'json'
-    | 'text'
-    | 'stream'
-    | 'formdata';
+  responseType?: ResponseType;
   responseInterceptor?: (response: Response) => Promise<Response>;
   /**
    * Request Interceptor of fetch. It will be called before request
@@ -71,75 +53,69 @@ export type NextFetchDefaultOptions = {
   requestInterceptor?: (requestArg: RequestInit) => Promise<RequestInit>;
 };
 
-const processResponse = async <T extends ResponseType, D = any>(
-  fetchResponse: Response,
+// return response로 가공하는 함수
+const processReturnResponse = async <T = any>(
+  response: Response,
   responseType: ResponseType,
-): Promise<NextFetchResponse<T, D>> => {
-  let data: ResponseData<T, D>;
+) => {
+  let data: T;
   switch (responseType) {
     case 'arraybuffer':
-      data = (await fetchResponse.arrayBuffer()) as ResponseData<T, D>;
+      data = (await response.arrayBuffer()) as T;
       break;
 
     case 'json':
-      data = (await fetchResponse.json()) as ResponseData<T, D>;
+      data = await response.json();
       break;
 
     case 'text':
-      data = (await fetchResponse.text()) as ResponseData<T, D>;
+      data = (await response.text()) as T;
       break;
 
     case 'formdata':
-      data = (await fetchResponse.formData()) as ResponseData<T, D>;
+      data = (await response.formData()) as T;
       break;
 
     case 'blob':
-      data = (await fetchResponse.blob()) as ResponseData<T, D>;
+      data = (await response.blob()) as T;
       break;
 
     default:
-      data = fetchResponse.body as ResponseData<T, D>;
+      data = response.body as T;
       break;
     // stream일 때 이게 맞는지?
   }
   return {
     data,
-    status: fetchResponse.status,
-    statusText: fetchResponse.statusText,
-    headers: fetchResponse.headers,
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
   };
 };
 
 export const nextFetch = {
   create: (defaultOptions?: NextFetchDefaultOptions) => {
     const instance = {
-      async get<T extends ResponseType>(
-        url: string | URL,
-        ...args: Parameters<typeof fetch>
-      ): Promise<NextFetchResponse<T>> {
+      async get<T = any>(url: string | URL): Promise<Nextresponse<T>> {
         // default options를 가지고 options 만들기
         let requestArgs: any;
-        if (defaultOptions?.requestInterceptor) {
-          requestArgs = await defaultOptions?.requestInterceptor(requestArgs);
-        }
 
         // 요청에는 먼저 content type을 확인한다
         //
-        let fetchResponse = await fetch(url, {
+        let response = await fetch(url, {
           method: 'get',
-          body: requestArgs.data,
         }); // 수정 필요 현재는 response interceptor을 위한 임의 값
 
         if (requestArgs.responseInterceptor) {
-          fetchResponse = await requestArgs.responseInterceptor(fetchResponse);
+          response = await requestArgs.responseInterceptor(response);
         } // interceptor 실행
 
-        const response = await processResponse<T>(
-          fetchResponse,
+        const returnResponse = await processReturnResponse<T>(
+          response,
           requestArgs.responseType,
         );
 
-        return response;
+        return returnResponse;
 
         // 요청 값 반환
       },
