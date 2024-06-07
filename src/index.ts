@@ -50,7 +50,7 @@ interface RequestInit {
   /** next fetch does not have a method attribute because it has http request method. */
 
   /** A BodyInit object or null to set request's body. */
-  data?: BodyInit | null;
+  data?: BodyInit | Record<string, any>;
   /** A string indicating how the request will interact with the browser's cache to set request's cache. */
   cache?: RequestCache;
   /** A string indicating whether credentials will be sent with the request always, never, or only when sent to a same-origin URL. Sets request's credentials. */
@@ -75,11 +75,13 @@ interface RequestInit {
   /** Can only be null. Used to disassociate request from any Window. */
   window?: null;
   /** Response Interceptor of fetch. It will be called after response */
-  responseInterceptor?: (requestArg: RequestInit) => Promise<RequestInit>;
+  responseInterceptor?: (response: Response) => Promise<Response>;
   /** Request Interceptor of fetch. It will be called before request */
-  requestInterceptor?: (responseArg: ResponseInit) => Promise<ResponseInit>;
+  requestInterceptor?: (requestArg: RequestInit) => Promise<RequestInit>;
   /** Throw Error of fetch. If the throwError attribute is true, throw an error when the status is 300 or more */
   throwError?: boolean;
+  /** data's type */
+  responseType?: ResponseType;
 }
 
 const applyDefaultOptionsArgs = (
@@ -120,6 +122,7 @@ export const nextFetch = {
         );
 
         // request interceptor 실행
+
         // 요청
         // response interceptor 실행
         // 요청 값 반환
