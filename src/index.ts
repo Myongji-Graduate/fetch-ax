@@ -74,6 +74,12 @@ interface RequestInit {
   signal?: AbortSignal | null;
   /** Can only be null. Used to disassociate request from any Window. */
   window?: null;
+  /** Response Interceptor of fetch. It will be called after response */
+  responseInterceptor?: (requestArg: RequestInit) => Promise<RequestInit>;
+  /** Request Interceptor of fetch. It will be called before request */
+  requestInterceptor?: (responseArg: ResponseInit) => Promise<ResponseInit>;
+  /** Throw Error of fetch. If the throwError attribute is true, throw an error when the status is 300 or more */
+  throwError?: boolean;
 }
 
 const applyDefaultOptionsArgs = (
