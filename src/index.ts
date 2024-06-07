@@ -24,12 +24,6 @@ export type NextFetchDefaultOptions = {
    */
   responseJson?: boolean;
   /**
-   * Request Json of fetch. If the requestJson attribute is true, request data type is json
-   *
-   * @public
-   */
-  requestJson?: boolean;
-  /**
    * Response Interceptor of fetch. It will be called after response
    *
    * @public
