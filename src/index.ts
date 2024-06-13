@@ -183,7 +183,6 @@ export const nextFetch = {
           [url, args],
           defaultOptions,
         );
-        if (args?.requestInterceptor) args?.requestInterceptor(args);
 
         let response = await fetch(requestUrl, {
           ...requestArgs,
