@@ -34,12 +34,6 @@ export type NextFetchDefaultOptions = {
    */
   throwError?: boolean;
   /**
-   * Response Json of fetch. If the responseJson attribute is true, response data type is json
-   *
-   * @public
-   */
-  requestJson?: boolean;
-  /**
    * Response Interceptor of fetch. It will be called after response
    *
    * @public
@@ -206,7 +200,6 @@ export const nextFetch = {
         );
 
         return returnResponse;
-
         // 요청 값 반환
       },
       post(): any {},
