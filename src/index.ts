@@ -97,7 +97,7 @@ const processReturnResponse = async <T = any>(
  */
 export type FetchArgs = [string | URL, RequestInit | undefined];
 
-interface RequestInit {
+export interface RequestInit {
   /** next fetch does not have a method attribute because it has http request method. */
 
   /** A BodyInit object or null to set request's body. */
@@ -155,7 +155,7 @@ const applyDefaultOptionsArgs = (
     });
   }
 
-  let requestArgs = {
+  let requestArgs: RequestInit = {
     ...defaultOptions,
     ...requestInit,
     headers: requestHeaders,

@@ -1,4 +1,4 @@
-import { nextFetch } from '../src';
+import { nextFetch, RequestInit } from '../src';
 
 describe('next-fetch', () => {
   it('should call global fetch when no default options.', async () => {
@@ -98,12 +98,15 @@ describe('next-fetch', () => {
   });
   it('should call request, response interceptors', async () => {
     // given
-    const requestInterceptor = (requestInit: RequestInit) => {
-      return requestInit;
+    const requestInterceptor = (requestArg: RequestInit) => {
+      return requestArg;
     };
-    const responseInterceptor = (response: Response) => {
-      return Response;
+    const responseInterceptor = (
+      response: Response,
+    ): Response | Promise<Response> => {
+      return response;
     };
+
     const instance = nextFetch.create({
       headers: {
         'Content-Type': 'application/json',
