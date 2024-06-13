@@ -1,4 +1,5 @@
-type Nextresponse<T = any> = {
+import { httpErrorHandling } from './error';
+type NextResponse<T = any> = {
   data: T;
   status: number;
   statusText: string;
@@ -33,30 +34,24 @@ export type NextFetchDefaultOptions = {
    */
   throwError?: boolean;
   /**
-   * Response Json of fetch. If the responseJson attribute is true, response data type is json
-   *
-   * @public
-   */
-  responseJson?: boolean;
-  /**
    * Response Interceptor of fetch. It will be called after response
    *
    * @public
    */
   responseType?: ResponseType;
-  responseInterceptor?: (response: Response) => Promise<Response>;
+  responseInterceptor?: (response: Response) => Response | Promise<Response>;
   /**
    * Request Interceptor of fetch. It will be called before request
    *
    * @public
    */
-  requestInterceptor?: (requestArg: RequestInit) => Promise<RequestInit>;
+  requestInterceptor?: (requestArg: RequestInit) => RequestInit;
 };
 
 // return response로 가공하는 함수
 const processReturnResponse = async <T = any>(
   response: Response,
-  responseType: ResponseType,
+  responseType?: ResponseType,
 ) => {
   let data: T;
   switch (responseType) {
@@ -112,7 +107,7 @@ interface RequestInit {
   /** A string indicating whether credentials will be sent with the request always, never, or only when sent to a same-origin URL. Sets request's credentials. */
   credentials?: RequestCredentials;
   /** A Headers object, an object literal, or an array of two-item arrays to set request's headers. */
-  headers?: HeadersInit;
+  headers: Headers;
   /** A cryptographic hash of the resource to be fetched by request. Sets request's integrity. */
   integrity?: string;
   /** A boolean to set request's keepalive. */
@@ -131,9 +126,9 @@ interface RequestInit {
   /** Can only be null. Used to disassociate request from any Window. */
   window?: null;
   /** Response Interceptor of fetch. It will be called after response */
-  responseInterceptor?: (response: Response) => Promise<Response>;
+  responseInterceptor?: (response: Response) => Response | Promise<Response>;
   /** Request Interceptor of fetch. It will be called before request */
-  requestInterceptor?: (requestArg: RequestInit) => Promise<RequestInit>;
+  requestInterceptor?: (requestArg: RequestInit) => RequestInit;
   /** Throw Error of fetch. If the throwError attribute is true, throw an error when the status is 300 or more */
   throwError?: boolean;
   /** data's type */
@@ -148,18 +143,32 @@ const applyDefaultOptionsArgs = (
     ? new URL(url, defaultOptions.baseURL)
     : url;
 
-  const requestHeaders = new Headers({
-    ...defaultOptions?.headers,
-    ...requestInit?.headers,
-  });
+  const requestHeaders = new Headers([['Content-Type', 'application/json']]);
+  if (defaultOptions?.headers) {
+    new Headers(defaultOptions.headers).forEach((value, key) => {
+      requestHeaders.set(key, value);
+    });
+  }
+  if (requestInit?.headers) {
+    new Headers(requestInit.headers).forEach((value, key) => {
+      requestHeaders.set(key, value);
+    });
+  }
 
-  return [
-    requestUrl,
-    {
-      ...requestInit,
-      headers: requestHeaders,
-    },
-  ];
+  let requestArgs = {
+    ...defaultOptions,
+    ...requestInit,
+    headers: requestHeaders,
+  };
+
+  if (defaultOptions?.requestInterceptor) {
+    requestArgs = defaultOptions.requestInterceptor(requestArgs);
+  }
+  if (requestInit?.requestInterceptor) {
+    requestArgs = requestInit.requestInterceptor(requestArgs);
+  }
+
+  return [requestUrl, requestArgs];
 };
 
 export const nextFetch = {
@@ -168,23 +177,26 @@ export const nextFetch = {
       async get<T = any>(
         url: string | URL,
         args?: RequestInit,
-      ): Promise<Nextresponse<T>> {
+      ): Promise<NextResponse<T>> {
         // default options를 가지고 options 만들기
-        let requestArgs = applyDefaultOptionsArgs([url, args], defaultOptions);
-        // 요청에는 먼저 content type을 확인한다
-        //
-        let response = await fetch(url, {
+        const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
+          [url, args],
+          defaultOptions,
+        );
+
+        let response = await fetch(requestUrl, {
+          ...requestArgs,
           method: 'get',
-        }); // 수정 필요 현재는 response interceptor을 위한 임의 값
+        });
 
         httpErrorHandling(response);
-        if (requestArgs.responseInterceptor) {
+        if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         } // interceptor 실행
 
         const returnResponse = await processReturnResponse<T>(
           response,
-          requestArgs.responseType,
+          requestArgs?.responseType,
         );
 
         return returnResponse;
