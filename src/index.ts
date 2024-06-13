@@ -1,4 +1,5 @@
 import { httpErrorHandling } from './error';
+
 type NextResponse<T = any> = {
   data: T;
   status: number;
@@ -33,22 +34,30 @@ export type NextFetchDefaultOptions = {
    * @public
    */
   throwError?: boolean;
+
   /**
-   * Response Interceptor of fetch. It will be called after response
+   * Response type. It will be used when the type of response data is set
+   * json, array buffer, stream, text, blob, formData
    *
    * @public
    */
+
   responseType?: ResponseType;
-  responseInterceptor?: (response: Response) => Response | Promise<Response>;
   /**
    * Request Interceptor of fetch. It will be called before request
+   *
+   * @public
+   */
+  responseInterceptor?: (response: Response) => Response | Promise<Response>;
+
+  /**
+   * Response Interceptor of fetch. It will be called after response
    *
    * @public
    */
   requestInterceptor?: (requestArg: RequestInit) => RequestInit;
 };
 
-// return response로 가공하는 함수
 const processReturnResponse = async <T = any>(
   response: Response,
   responseType?: ResponseType,
@@ -78,7 +87,6 @@ const processReturnResponse = async <T = any>(
     default:
       data = response.body as T;
       break;
-    // stream일 때 이게 맞는지?
   }
   return {
     data,
@@ -101,7 +109,7 @@ interface RequestInit {
   /** next fetch does not have a method attribute because it has http request method. */
 
   /** A BodyInit object or null to set request's body. */
-  data?: BodyInit | Record<string, any>;
+  data?: BodyInit;
   /** A string indicating how the request will interact with the browser's cache to set request's cache. */
   cache?: RequestCache;
   /** A string indicating whether credentials will be sent with the request always, never, or only when sent to a same-origin URL. Sets request's credentials. */
@@ -178,7 +186,6 @@ export const nextFetch = {
         url: string | URL,
         args?: RequestInit,
       ): Promise<NextResponse<T>> {
-        // default options를 가지고 options 만들기
         const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
           [url, args],
           defaultOptions,
@@ -186,13 +193,13 @@ export const nextFetch = {
 
         let response = await fetch(requestUrl, {
           ...requestArgs,
-          method: 'get',
+          method: 'GET',
         });
 
         httpErrorHandling(response);
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
-        } // interceptor 실행
+        }
 
         const returnResponse = await processReturnResponse<T>(
           response,
@@ -200,13 +207,140 @@ export const nextFetch = {
         );
 
         return returnResponse;
-        // 요청 값 반환
       },
-      post(): any {},
-      put(): any {},
-      delete(): any {},
-      patch(): any {},
-      head(): any {},
+      async post<T = any>(
+        url: string | URL,
+        args?: RequestInit,
+      ): Promise<NextResponse<T>> {
+        const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
+          [url, args],
+          defaultOptions,
+        );
+
+        let response = await fetch(requestUrl, {
+          ...requestArgs,
+          method: 'POST',
+          body: requestArgs?.data ? requestArgs.data : null,
+        });
+
+        httpErrorHandling(response);
+        if (requestArgs?.responseInterceptor) {
+          response = await requestArgs.responseInterceptor(response);
+        }
+
+        const returnResponse = await processReturnResponse<T>(
+          response,
+          requestArgs?.responseType,
+        );
+
+        return returnResponse;
+      },
+      async put<T = any>(
+        url: string | URL,
+        args?: RequestInit,
+      ): Promise<NextResponse<T>> {
+        const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
+          [url, args],
+          defaultOptions,
+        );
+
+        let response = await fetch(requestUrl, {
+          ...requestArgs,
+          method: 'PUT',
+          body: requestArgs?.data ? requestArgs.data : null,
+        });
+
+        httpErrorHandling(response);
+        if (requestArgs?.responseInterceptor) {
+          response = await requestArgs.responseInterceptor(response);
+        }
+
+        const returnResponse = await processReturnResponse<T>(
+          response,
+          requestArgs?.responseType,
+        );
+
+        return returnResponse;
+      },
+      async delete<T = any>(
+        url: string | URL,
+        args?: RequestInit,
+      ): Promise<NextResponse<T>> {
+        const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
+          [url, args],
+          defaultOptions,
+        );
+
+        let response = await fetch(requestUrl, {
+          ...requestArgs,
+          method: 'DELETE',
+        });
+
+        httpErrorHandling(response);
+        if (requestArgs?.responseInterceptor) {
+          response = await requestArgs.responseInterceptor(response);
+        }
+
+        const returnResponse = await processReturnResponse<T>(
+          response,
+          requestArgs?.responseType,
+        );
+
+        return returnResponse;
+      },
+      async patch<T = any>(
+        url: string | URL,
+        args?: RequestInit,
+      ): Promise<NextResponse<T>> {
+        const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
+          [url, args],
+          defaultOptions,
+        );
+
+        let response = await fetch(requestUrl, {
+          ...requestArgs,
+          method: 'PATCH',
+          body: requestArgs?.data ? requestArgs.data : null,
+        });
+
+        httpErrorHandling(response);
+        if (requestArgs?.responseInterceptor) {
+          response = await requestArgs.responseInterceptor(response);
+        }
+
+        const returnResponse = await processReturnResponse<T>(
+          response,
+          requestArgs?.responseType,
+        );
+
+        return returnResponse;
+      },
+      async head<T = any>(
+        url: string | URL,
+        args?: RequestInit,
+      ): Promise<NextResponse<T>> {
+        const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
+          [url, args],
+          defaultOptions,
+        );
+
+        let response = await fetch(requestUrl, {
+          ...requestArgs,
+          method: 'HEAD',
+        });
+
+        httpErrorHandling(response);
+        if (requestArgs?.responseInterceptor) {
+          response = await requestArgs.responseInterceptor(response);
+        }
+
+        const returnResponse = await processReturnResponse<T>(
+          response,
+          requestArgs?.responseType,
+        );
+
+        return returnResponse;
+      },
     };
     return instance;
   },
