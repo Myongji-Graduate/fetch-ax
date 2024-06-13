@@ -1,10 +1,25 @@
+type Nextresponse<T = any> = {
+  data: T;
+  status: number;
+  statusText: string;
+  headers: Headers;
+};
+
+type ResponseType =
+  | 'arraybuffer'
+  | 'blob'
+  | 'json'
+  | 'text'
+  | 'stream'
+  | 'formdata';
+
 export type NextFetchDefaultOptions = {
   /**
    * Base URL of fetch. It will be used when the first argument of fetch is relative URL.
    *
    * @public
    */
-  baseUrl?: string | URL;
+  baseURL?: string | URL;
   /**
    * Defatul Headers of fetch. It will be used when the headers attribute does not exist in the optional object
    *
@@ -28,13 +43,54 @@ export type NextFetchDefaultOptions = {
    *
    * @public
    */
-  responseInterceptor?: (requestArg: RequestInit) => Promise<RequestInit>;
+  responseType?: ResponseType;
+  responseInterceptor?: (response: Response) => Promise<Response>;
   /**
    * Request Interceptor of fetch. It will be called before request
    *
    * @public
    */
-  requestInterceptor?: (responseArg: ResponseInit) => Promise<ResponseInit>;
+  requestInterceptor?: (requestArg: RequestInit) => Promise<RequestInit>;
+};
+
+// return response로 가공하는 함수
+const processReturnResponse = async <T = any>(
+  response: Response,
+  responseType: ResponseType,
+) => {
+  let data: T;
+  switch (responseType) {
+    case 'arraybuffer':
+      data = (await response.arrayBuffer()) as T;
+      break;
+
+    case 'json':
+      data = await response.json();
+      break;
+
+    case 'text':
+      data = (await response.text()) as T;
+      break;
+
+    case 'formdata':
+      data = (await response.formData()) as T;
+      break;
+
+    case 'blob':
+      data = (await response.blob()) as T;
+      break;
+
+    default:
+      data = response.body as T;
+      break;
+    // stream일 때 이게 맞는지?
+  }
+  return {
+    data,
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  };
 };
 
 /**
@@ -109,22 +165,29 @@ const applyDefaultOptionsArgs = (
 export const nextFetch = {
   create: (defaultOptions?: NextFetchDefaultOptions) => {
     const instance = {
-      async get(
-        url: string | URL,
-        args?: RequestInit,
-      ): Promise<Response | any> {
-        // 개발 진행 중이므로 any타입을 임의로 추가
-
-        // default options를 적용한 args 생성
-        const requestArgs = applyDefaultOptionsArgs(
+      async get<T = any>(url: string | URL, args?: RequestInit): Promise<Nextresponse<T>> {
+        // default options를 가지고 options 만들기
+         let requestArgs = applyDefaultOptionsArgs(
           [url, args],
           defaultOptions,
         );
+        // 요청에는 먼저 content type을 확인한다
+        //
+        let response = await fetch(url, {
+          method: 'get',
+        }); // 수정 필요 현재는 response interceptor을 위한 임의 값
 
-        // request interceptor 실행
+        httpErrorHandling(response);
+        if (requestArgs.responseInterceptor) {
+          response = await requestArgs.responseInterceptor(response);
+        } // interceptor 실행
 
-        // 요청
-        // response interceptor 실행
+        const returnResponse = await processReturnResponse<T>(
+          response,
+          requestArgs.responseType,
+        );
+
+        return returnResponse;
         // 요청 값 반환
       },
       post(): any {},
