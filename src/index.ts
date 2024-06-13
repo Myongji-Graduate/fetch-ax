@@ -1,4 +1,5 @@
 import { httpErrorHandling } from './error';
+
 type NextResponse<T = any> = {
   data: T;
   status: number;
@@ -33,22 +34,30 @@ export type NextFetchDefaultOptions = {
    * @public
    */
   throwError?: boolean;
+
   /**
-   * Response Interceptor of fetch. It will be called after response
+   * Response type. It will be used when the type of response data is set
+   * json, array buffer, stream, text, blob, formData
    *
    * @public
    */
+
   responseType?: ResponseType;
-  responseInterceptor?: (response: Response) => Response | Promise<Response>;
   /**
    * Request Interceptor of fetch. It will be called before request
+   *
+   * @public
+   */
+  responseInterceptor?: (response: Response) => Response | Promise<Response>;
+
+  /**
+   * Response Interceptor of fetch. It will be called after response
    *
    * @public
    */
   requestInterceptor?: (requestArg: RequestInit) => RequestInit;
 };
 
-// return response로 가공하는 함수
 const processReturnResponse = async <T = any>(
   response: Response,
   responseType?: ResponseType,
@@ -78,7 +87,6 @@ const processReturnResponse = async <T = any>(
     default:
       data = response.body as T;
       break;
-    // stream일 때 이게 맞는지?
   }
   return {
     data,
