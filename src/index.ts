@@ -144,8 +144,8 @@ const applyDefaultOptionsArgs = (
   [url, requestInit]: FetchArgs,
   defaultOptions?: NextFetchDefaultOptions,
 ): FetchArgs => {
-  const requestUrl: FetchArgs[0] = defaultOptions?.baseUrl
-    ? new URL(url, defaultOptions.baseUrl)
+  const requestUrl: FetchArgs[0] = defaultOptions?.baseURL
+    ? new URL(url, defaultOptions.baseURL)
     : url;
 
   const requestHeaders = new Headers({
@@ -165,12 +165,12 @@ const applyDefaultOptionsArgs = (
 export const nextFetch = {
   create: (defaultOptions?: NextFetchDefaultOptions) => {
     const instance = {
-      async get<T = any>(url: string | URL, args?: RequestInit): Promise<Nextresponse<T>> {
+      async get<T = any>(
+        url: string | URL,
+        args?: RequestInit,
+      ): Promise<Nextresponse<T>> {
         // default options를 가지고 options 만들기
-         let requestArgs = applyDefaultOptionsArgs(
-          [url, args],
-          defaultOptions,
-        );
+        let requestArgs = applyDefaultOptionsArgs([url, args], defaultOptions);
         // 요청에는 먼저 content type을 확인한다
         //
         let response = await fetch(url, {
