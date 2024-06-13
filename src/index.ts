@@ -156,6 +156,7 @@ const applyDefaultOptionsArgs = (
   }
 
   let requestArgs = {
+    ...defaultOptions,
     ...requestInit,
     headers: requestHeaders,
   };
@@ -167,7 +168,7 @@ const applyDefaultOptionsArgs = (
     requestArgs = requestInit.requestInterceptor(requestArgs);
   }
 
-  return [requestUrl, { ...defaultOptions, ...requestArgs }];
+  return [requestUrl, requestArgs];
 };
 
 export const nextFetch = {
