@@ -26,7 +26,7 @@ export type NextFetchDefaultOptions = {
    *
    * @public
    */
-  headers?: Headers;
+  headers?: HeadersInit;
   /**
    * Throw Error of fetch. If the throwError attribute is true, throw an error when the status is 300 or more
    *
@@ -57,7 +57,7 @@ export type NextFetchDefaultOptions = {
 // return response로 가공하는 함수
 const processReturnResponse = async <T = any>(
   response: Response,
-  responseType: ResponseType,
+  responseType?: ResponseType,
 ) => {
   let data: T;
   switch (responseType) {
@@ -169,12 +169,11 @@ const applyDefaultOptionsArgs = (
   if (defaultOptions?.requestInterceptor) {
     requestArgs = defaultOptions.requestInterceptor(requestArgs);
   }
-
   if (requestInit?.requestInterceptor) {
     requestArgs = requestInit.requestInterceptor(requestArgs);
   }
 
-  return [requestUrl, requestArgs];
+  return [requestUrl, { ...defaultOptions, ...requestArgs }];
 };
 
 export const nextFetch = {
@@ -197,14 +196,14 @@ export const nextFetch = {
         }); // 수정 필요 현재는 response interceptor을 위한 임의 값
 
         httpErrorHandling(response);
-        // if (requestArgs.responseInterceptor) {
-        //   response = await requestArgs.responseInterceptor(response);
-        // } // interceptor 실행
+        if (requestArgs[1]?.responseInterceptor) {
+          response = await requestArgs[1].responseInterceptor(response);
+        } // interceptor 실행
 
-        // const returnResponse = await processReturnResponse<T>(
-        //   response,
-        //   requestArgs.responseType,
-        // );
+        const returnResponse = await processReturnResponse<T>(
+          response,
+          requestArgs[1]?.responseType,
+        );
 
         return returnResponse;
 
