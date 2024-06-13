@@ -26,7 +26,7 @@ export type NextFetchDefaultOptions = {
    *
    * @public
    */
-  headers?: HeadersInit;
+  headers?: Headers;
   /**
    * Throw Error of fetch. If the throwError attribute is true, throw an error when the status is 300 or more
    *
@@ -51,7 +51,7 @@ export type NextFetchDefaultOptions = {
    *
    * @public
    */
-  requestInterceptor?: (requestArg: RequestInit) => Promise<RequestInit>;
+  requestInterceptor?: (requestArg: RequestInit) => RequestInit;
 };
 
 // return response로 가공하는 함수
@@ -113,7 +113,7 @@ interface RequestInit {
   /** A string indicating whether credentials will be sent with the request always, never, or only when sent to a same-origin URL. Sets request's credentials. */
   credentials?: RequestCredentials;
   /** A Headers object, an object literal, or an array of two-item arrays to set request's headers. */
-  headers?: HeadersInit;
+  headers: Headers;
   /** A cryptographic hash of the resource to be fetched by request. Sets request's integrity. */
   integrity?: string;
   /** A boolean to set request's keepalive. */
@@ -134,7 +134,7 @@ interface RequestInit {
   /** Response Interceptor of fetch. It will be called after response */
   responseInterceptor?: (response: Response) => Promise<Response>;
   /** Request Interceptor of fetch. It will be called before request */
-  requestInterceptor?: (requestArg: RequestInit) => Promise<RequestInit>;
+  requestInterceptor?: (requestArg: RequestInit) => RequestInit;
   /** Throw Error of fetch. If the throwError attribute is true, throw an error when the status is 300 or more */
   throwError?: boolean;
   /** data's type */
@@ -149,18 +149,32 @@ const applyDefaultOptionsArgs = (
     ? new URL(url, defaultOptions.baseURL)
     : url;
 
-  const requestHeaders = new Headers({
-    ...defaultOptions?.headers,
-    ...requestInit?.headers,
-  });
+  const requestHeaders = new Headers([['Content-Type', 'application/json']]);
+  if (defaultOptions?.headers) {
+    new Headers(defaultOptions.headers).forEach((value, key) => {
+      requestHeaders.set(key, value);
+    });
+  }
+  if (requestInit?.headers) {
+    new Headers(requestInit.headers).forEach((value, key) => {
+      requestHeaders.set(key, value);
+    });
+  }
 
-  return [
-    requestUrl,
-    {
-      ...requestInit,
-      headers: requestHeaders,
-    },
-  ];
+  let requestArgs = {
+    ...requestInit,
+    headers: requestHeaders,
+  };
+
+  if (defaultOptions?.requestInterceptor) {
+    requestArgs = defaultOptions.requestInterceptor(requestArgs);
+  }
+
+  if (requestInit?.requestInterceptor) {
+    requestArgs = requestInit.requestInterceptor(requestArgs);
+  }
+
+  return [requestUrl, requestArgs];
 };
 
 export const nextFetch = {
@@ -175,6 +189,7 @@ export const nextFetch = {
           [url, args],
           defaultOptions,
         );
+        if (args?.requestInterceptor) args?.requestInterceptor(args);
 
         // 요청에는 먼저 content type을 확인한다
         let response = await fetch(url, {
