@@ -39,7 +39,7 @@ export type NextFetchDefaultOptions = {
    * @public
    */
   responseType?: ResponseType;
-  responseInterceptor?: (response: Response) => Promise<Response>;
+  responseInterceptor?: (response: Response) => Response | Promise<Response>;
   /**
    * Request Interceptor of fetch. It will be called before request
    *
@@ -126,7 +126,7 @@ interface RequestInit {
   /** Can only be null. Used to disassociate request from any Window. */
   window?: null;
   /** Response Interceptor of fetch. It will be called after response */
-  responseInterceptor?: (response: Response) => Promise<Response>;
+  responseInterceptor?: (response: Response) => Response | Promise<Response>;
   /** Request Interceptor of fetch. It will be called before request */
   requestInterceptor?: (requestArg: RequestInit) => RequestInit;
   /** Throw Error of fetch. If the throwError attribute is true, throw an error when the status is 300 or more */
