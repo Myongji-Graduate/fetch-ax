@@ -16,6 +16,7 @@ module.exports = {
         'test',
         'build',
         'setting',
+        'example',
       ],
     ],
   },
