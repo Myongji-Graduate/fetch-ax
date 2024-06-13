@@ -115,7 +115,7 @@ interface RequestInit {
   /** A string indicating whether credentials will be sent with the request always, never, or only when sent to a same-origin URL. Sets request's credentials. */
   credentials?: RequestCredentials;
   /** A Headers object, an object literal, or an array of two-item arrays to set request's headers. */
-  headers: Headers;
+  headers?: Headers;
   /** A cryptographic hash of the resource to be fetched by request. Sets request's integrity. */
   integrity?: string;
   /** A boolean to set request's keepalive. */
@@ -143,6 +143,31 @@ interface RequestInit {
   responseType?: ResponseType;
 }
 
+const isArrayBufferView = (data: any): data is ArrayBufferView => {
+  return (
+    data &&
+    typeof data === 'object' &&
+    'buffer' in data &&
+    data.buffer instanceof ArrayBuffer &&
+    'byteLength' in data &&
+    typeof data.byteLength === 'number' &&
+    'byteOffset' in data &&
+    typeof data.byteOffset === 'number'
+  );
+};
+
+const isBodyInit = (data: any): data is BodyInit => {
+  return (
+    typeof data === 'string' ||
+    data instanceof ReadableStream ||
+    data instanceof Blob ||
+    data instanceof ArrayBuffer ||
+    data instanceof FormData ||
+    data instanceof URLSearchParams ||
+    isArrayBufferView(data)
+  );
+};
+
 const applyDefaultOptionsArgs = (
   [url, requestInit]: FetchArgs,
   defaultOptions?: NextFetchDefaultOptions,
@@ -163,14 +188,7 @@ const applyDefaultOptionsArgs = (
     });
   }
 
-  if (
-    requestInit?.data &&
-    requestHeaders.get('Content-Type') === 'application/json'
-  ) {
-    requestInit.data = JSON.stringify(requestInit.data);
-  }
-
-  let requestArgs = {
+  let requestArgs: RequestInit = {
     ...defaultOptions,
     ...requestInit,
     headers: requestHeaders,
