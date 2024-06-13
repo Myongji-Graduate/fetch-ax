@@ -179,25 +179,25 @@ export const nextFetch = {
         args?: RequestInit,
       ): Promise<NextResponse<T>> {
         // default options를 가지고 options 만들기
-        const requestArgs = applyDefaultOptionsArgs(
+        const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
           [url, args],
           defaultOptions,
         );
         if (args?.requestInterceptor) args?.requestInterceptor(args);
 
-        // 요청에는 먼저 content type을 확인한다
-        let response = await fetch(url, {
+        let response = await fetch(requestUrl, {
+          ...requestArgs,
           method: 'get',
-        }); // 수정 필요 현재는 response interceptor을 위한 임의 값
+        });
 
         httpErrorHandling(response);
-        if (requestArgs[1]?.responseInterceptor) {
-          response = await requestArgs[1].responseInterceptor(response);
+        if (requestArgs?.responseInterceptor) {
+          response = await requestArgs.responseInterceptor(response);
         } // interceptor 실행
 
         const returnResponse = await processReturnResponse<T>(
           response,
-          requestArgs[1]?.responseType,
+          requestArgs?.responseType,
         );
 
         return returnResponse;
