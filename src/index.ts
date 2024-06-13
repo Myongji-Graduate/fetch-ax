@@ -109,7 +109,7 @@ interface RequestInit {
   /** next fetch does not have a method attribute because it has http request method. */
 
   /** A BodyInit object or null to set request's body. */
-  data?: BodyInit;
+  data?: BodyInit | Record<string, any>;
   /** A string indicating how the request will interact with the browser's cache to set request's cache. */
   cache?: RequestCache;
   /** A string indicating whether credentials will be sent with the request always, never, or only when sent to a same-origin URL. Sets request's credentials. */
@@ -188,6 +188,9 @@ const applyDefaultOptionsArgs = (
     });
   }
 
+  if (requestInit?.data && !isBodyInit(requestInit?.data)) {
+    requestInit.data = JSON.stringify(requestInit.data);
+  }
   let requestArgs: RequestInit = {
     ...defaultOptions,
     ...requestInit,
@@ -245,7 +248,7 @@ export const nextFetch = {
         let response = await fetch(requestUrl, {
           ...requestArgs,
           method: 'POST',
-          body: requestArgs?.data ? requestArgs.data : null,
+          body: requestArgs?.data ? (requestArgs.data as BodyInit) : null,
         });
 
         httpErrorHandling(response);
@@ -272,7 +275,7 @@ export const nextFetch = {
         let response = await fetch(requestUrl, {
           ...requestArgs,
           method: 'PUT',
-          body: requestArgs?.data ? requestArgs.data : null,
+          body: requestArgs?.data ? (requestArgs.data as BodyInit) : null,
         });
 
         httpErrorHandling(response);
@@ -325,7 +328,7 @@ export const nextFetch = {
         let response = await fetch(requestUrl, {
           ...requestArgs,
           method: 'PATCH',
-          body: requestArgs?.data ? requestArgs.data : null,
+          body: requestArgs?.data ? (requestArgs.data as BodyInit) : null,
         });
 
         httpErrorHandling(response);
