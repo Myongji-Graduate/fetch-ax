@@ -9,7 +9,7 @@ class NextFetchError extends Error {
   }
 }
 
-const httpErrorHandling = (response: Response) => {
+export const httpErrorHandling = (response: Response) => {
   if (response.status >= 300)
     throw new NextFetchError(response.status, response);
 };
