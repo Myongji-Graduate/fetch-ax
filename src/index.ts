@@ -1,5 +1,5 @@
 import { httpErrorHandling } from './error';
-type Nextresponse<T = any> = {
+type NextResponse<T = any> = {
   data: T;
   status: number;
   statusText: string;
@@ -177,7 +177,7 @@ export const nextFetch = {
       async get<T = any>(
         url: string | URL,
         args?: RequestInit,
-      ): Promise<Nextresponse<T>> {
+      ): Promise<NextResponse<T>> {
         // default options를 가지고 options 만들기
         const requestArgs = applyDefaultOptionsArgs(
           [url, args],
