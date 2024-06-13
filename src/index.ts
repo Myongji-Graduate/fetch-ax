@@ -163,6 +163,13 @@ const applyDefaultOptionsArgs = (
     });
   }
 
+  if (
+    requestInit?.data &&
+    requestHeaders.get('Content-Type') === 'application/json'
+  ) {
+    requestInit.data = JSON.stringify(requestInit.data);
+  }
+
   let requestArgs = {
     ...defaultOptions,
     ...requestInit,
