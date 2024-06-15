@@ -197,6 +197,12 @@ const applyDefaultOptionsArgs = (
     headers: requestHeaders,
   };
 
+  if (!requestArgs.throwError) {
+    requestArgs.throwError = defaultOptions?.throwError
+      ? defaultOptions?.throwError
+      : false;
+  }
+
   if (defaultOptions?.requestInterceptor) {
     requestArgs = defaultOptions.requestInterceptor(requestArgs);
   }
@@ -224,7 +230,11 @@ export const nextFetch = {
           method: 'GET',
         });
 
-        httpErrorHandling(response);
+        if (requestArgs?.throwError) httpErrorHandling(response);
+
+        if (defaultOptions?.responseInterceptor) {
+          response = await defaultOptions.responseInterceptor(response);
+        }
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         }
@@ -251,11 +261,14 @@ export const nextFetch = {
           body: requestArgs?.data ? (requestArgs.data as BodyInit) : null,
         });
 
-        httpErrorHandling(response);
+        if (requestArgs?.throwError) httpErrorHandling(response);
+
+        if (defaultOptions?.responseInterceptor) {
+          response = await defaultOptions.responseInterceptor(response);
+        }
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         }
-
         const returnResponse = await processReturnResponse<T>(
           response,
           requestArgs?.responseType,
@@ -278,7 +291,11 @@ export const nextFetch = {
           body: requestArgs?.data ? (requestArgs.data as BodyInit) : null,
         });
 
-        httpErrorHandling(response);
+        if (requestArgs?.throwError) httpErrorHandling(response);
+
+        if (defaultOptions?.responseInterceptor) {
+          response = await defaultOptions.responseInterceptor(response);
+        }
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         }
@@ -304,7 +321,11 @@ export const nextFetch = {
           method: 'DELETE',
         });
 
-        httpErrorHandling(response);
+        if (requestArgs?.throwError) httpErrorHandling(response);
+
+        if (defaultOptions?.responseInterceptor) {
+          response = await defaultOptions.responseInterceptor(response);
+        }
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         }
@@ -331,7 +352,11 @@ export const nextFetch = {
           body: requestArgs?.data ? (requestArgs.data as BodyInit) : null,
         });
 
-        httpErrorHandling(response);
+        if (requestArgs?.throwError) httpErrorHandling(response);
+
+        if (defaultOptions?.responseInterceptor) {
+          response = await defaultOptions.responseInterceptor(response);
+        }
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         }
@@ -357,11 +382,14 @@ export const nextFetch = {
           method: 'HEAD',
         });
 
-        httpErrorHandling(response);
+        if (requestArgs?.throwError) httpErrorHandling(response);
+
+        if (defaultOptions?.responseInterceptor) {
+          response = await defaultOptions.responseInterceptor(response);
+        }
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         }
-
         const returnResponse = await processReturnResponse<T>(
           response,
           requestArgs?.responseType,
