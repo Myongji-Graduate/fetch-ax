@@ -115,7 +115,7 @@ interface RequestInit {
   /** A string indicating whether credentials will be sent with the request always, never, or only when sent to a same-origin URL. Sets request's credentials. */
   credentials?: RequestCredentials;
   /** A Headers object, an object literal, or an array of two-item arrays to set request's headers. */
-  headers?: Headers;
+  headers?: HeadersInit;
   /** A cryptographic hash of the resource to be fetched by request. Sets request's integrity. */
   integrity?: string;
   /** A boolean to set request's keepalive. */
