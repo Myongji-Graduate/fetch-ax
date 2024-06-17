@@ -109,13 +109,13 @@ interface RequestInit {
   /** next fetch does not have a method attribute because it has http request method. */
 
   /** A BodyInit object or null to set request's body. */
-  data?: BodyInit;
+  data?: BodyInit | Record<string, any>;
   /** A string indicating how the request will interact with the browser's cache to set request's cache. */
   cache?: RequestCache;
   /** A string indicating whether credentials will be sent with the request always, never, or only when sent to a same-origin URL. Sets request's credentials. */
   credentials?: RequestCredentials;
   /** A Headers object, an object literal, or an array of two-item arrays to set request's headers. */
-  headers: Headers;
+  headers?: HeadersInit;
   /** A cryptographic hash of the resource to be fetched by request. Sets request's integrity. */
   integrity?: string;
   /** A boolean to set request's keepalive. */
@@ -143,6 +143,31 @@ interface RequestInit {
   responseType?: ResponseType;
 }
 
+const isArrayBufferView = (data: any): data is ArrayBufferView => {
+  return (
+    data &&
+    typeof data === 'object' &&
+    'buffer' in data &&
+    data.buffer instanceof ArrayBuffer &&
+    'byteLength' in data &&
+    typeof data.byteLength === 'number' &&
+    'byteOffset' in data &&
+    typeof data.byteOffset === 'number'
+  );
+};
+
+const isBodyInit = (data: any): data is BodyInit => {
+  return (
+    typeof data === 'string' ||
+    data instanceof ReadableStream ||
+    data instanceof Blob ||
+    data instanceof ArrayBuffer ||
+    data instanceof FormData ||
+    data instanceof URLSearchParams ||
+    isArrayBufferView(data)
+  );
+};
+
 const applyDefaultOptionsArgs = (
   [url, requestInit]: FetchArgs,
   defaultOptions?: NextFetchDefaultOptions,
@@ -163,11 +188,20 @@ const applyDefaultOptionsArgs = (
     });
   }
 
-  let requestArgs = {
+  if (requestInit?.data && !isBodyInit(requestInit?.data)) {
+    requestInit.data = JSON.stringify(requestInit.data);
+  }
+  let requestArgs: RequestInit = {
     ...defaultOptions,
     ...requestInit,
     headers: requestHeaders,
   };
+
+  if (!requestArgs.throwError) {
+    requestArgs.throwError = defaultOptions?.throwError
+      ? defaultOptions?.throwError
+      : false;
+  }
 
   if (defaultOptions?.requestInterceptor) {
     requestArgs = defaultOptions.requestInterceptor(requestArgs);
@@ -196,7 +230,11 @@ export const nextFetch = {
           method: 'GET',
         });
 
-        httpErrorHandling(response);
+        if (requestArgs?.throwError) httpErrorHandling(response);
+
+        if (defaultOptions?.responseInterceptor) {
+          response = await defaultOptions.responseInterceptor(response);
+        }
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         }
@@ -220,14 +258,17 @@ export const nextFetch = {
         let response = await fetch(requestUrl, {
           ...requestArgs,
           method: 'POST',
-          body: requestArgs?.data ? requestArgs.data : null,
+          body: requestArgs?.data ? (requestArgs.data as BodyInit) : null,
         });
 
-        httpErrorHandling(response);
+        if (requestArgs?.throwError) httpErrorHandling(response);
+
+        if (defaultOptions?.responseInterceptor) {
+          response = await defaultOptions.responseInterceptor(response);
+        }
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         }
-
         const returnResponse = await processReturnResponse<T>(
           response,
           requestArgs?.responseType,
@@ -247,10 +288,14 @@ export const nextFetch = {
         let response = await fetch(requestUrl, {
           ...requestArgs,
           method: 'PUT',
-          body: requestArgs?.data ? requestArgs.data : null,
+          body: requestArgs?.data ? (requestArgs.data as BodyInit) : null,
         });
 
-        httpErrorHandling(response);
+        if (requestArgs?.throwError) httpErrorHandling(response);
+
+        if (defaultOptions?.responseInterceptor) {
+          response = await defaultOptions.responseInterceptor(response);
+        }
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         }
@@ -276,7 +321,11 @@ export const nextFetch = {
           method: 'DELETE',
         });
 
-        httpErrorHandling(response);
+        if (requestArgs?.throwError) httpErrorHandling(response);
+
+        if (defaultOptions?.responseInterceptor) {
+          response = await defaultOptions.responseInterceptor(response);
+        }
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         }
@@ -300,10 +349,14 @@ export const nextFetch = {
         let response = await fetch(requestUrl, {
           ...requestArgs,
           method: 'PATCH',
-          body: requestArgs?.data ? requestArgs.data : null,
+          body: requestArgs?.data ? (requestArgs.data as BodyInit) : null,
         });
 
-        httpErrorHandling(response);
+        if (requestArgs?.throwError) httpErrorHandling(response);
+
+        if (defaultOptions?.responseInterceptor) {
+          response = await defaultOptions.responseInterceptor(response);
+        }
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         }
@@ -329,11 +382,14 @@ export const nextFetch = {
           method: 'HEAD',
         });
 
-        httpErrorHandling(response);
+        if (requestArgs?.throwError) httpErrorHandling(response);
+
+        if (defaultOptions?.responseInterceptor) {
+          response = await defaultOptions.responseInterceptor(response);
+        }
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         }
-
         const returnResponse = await processReturnResponse<T>(
           response,
           requestArgs?.responseType,
