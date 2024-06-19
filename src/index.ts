@@ -376,10 +376,10 @@ export const nextFetch = {
           defaultOptions,
         );
 
-        let response = await fetch(requestUrl, {
+        let response = (await fetch(requestUrl, {
           ...requestArgs,
           method: 'HEAD',
-        });
+        })) as unknown as Response;
 
         if (requestArgs?.throwError) httpErrorHandling(response);
 
