@@ -188,11 +188,13 @@ const applyDefaultOptionsArgs = (
     });
   }
 
-  let requestArgs = {
-    ...defaultOptions,
-    ...requestInit,
-    headers: requestHeaders,
-  };
+  let requestArgs = requestHeaders
+    ? {
+        ...defaultOptions,
+        ...requestInit,
+        headers: requestHeaders,
+      }
+    : { ...defaultOptions, ...requestInit };
 
   if (!requestArgs.throwError) {
     requestArgs.throwError = defaultOptions?.throwError
