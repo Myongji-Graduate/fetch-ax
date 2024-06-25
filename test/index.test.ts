@@ -132,26 +132,30 @@ describe('next-fetch', () => {
     expect(mockResponseInterceptor).toHaveBeenCalled();
   });
 
-  //   it('should throw error', async () => {
-  //     // given
-  //     const instance = nextFetch.create({
-  //       throwError: true,
-  //     });
+  it('should throw error', async () => {
+    // given
+    const instance = nextFetch.create({
+      throwError: true,
+    });
+    // when
+    const result = await instance.get(
+      'https://jsonplaceholder.typicode.com/Error/1',
+    );
+    // then
+    expect(result.data).toEqual(undefined);
+  });
 
-  //     expect(
-  //       await instance.get('https://jsonplaceholder.typicode.com/Error/1'),
-  //     ).toThrow();
-  //   });
+  it('should throw error', async () => {
+    // given
+    const instance = nextFetch.create({
+      responseType: 'json',
+    });
 
-  //   it('should throw error', async () => {
-  //     // given
-  //     const instance = nextFetch.create({
-  //       responseType: 'json',
-  //     });
-  //     const data = await instance.get(
-  //       'https://jsonplaceholder.typicode.com/Error/1',
-  //     );
-  //     expect(typeof data).toEqual(typeof JSON);
-  //   });
-  // });
+    //when
+    const data = await instance.get(
+      'https://jsonplaceholder.typicode.com/todos/1',
+    );
+    //then
+    expect(typeof data).toEqual(typeof JSON);
+  });
 });
