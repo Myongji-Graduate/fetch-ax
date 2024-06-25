@@ -228,6 +228,7 @@ export const nextFetch = {
           ...requestArgs,
           method: 'GET',
         });
+        response = await response.json();
 
         if (requestArgs?.throwError) httpErrorHandling(response);
 
