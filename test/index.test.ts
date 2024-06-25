@@ -3,6 +3,9 @@ import { nextFetch, RequestInit } from '../src';
 describe('next-fetch', () => {
   const globalFetch = global.fetch;
   let fetchMocked: jest.Mock;
+  let mockRequestInterceptor: jest.Mock;
+  let mockResponseInterceptor: jest.Mock;
+
   beforeEach(() => {
     fetchMocked = jest.fn().mockResolvedValue({
       json: jest.fn().mockResolvedValue({
@@ -12,8 +15,22 @@ describe('next-fetch', () => {
         completed: false,
       }),
     });
+
     // @ts-ignore
     global.fetch = fetchMocked;
+    mockRequestInterceptor = jest
+      .fn()
+      .mockImplementation((requestArg: RequestInit) => {
+        return requestArg;
+      });
+
+    mockResponseInterceptor = jest
+      .fn()
+      .mockImplementation(
+        (response: Response): Response | Promise<Response> => {
+          return response;
+        },
+      );
   });
 
   afterEach(() => {
@@ -92,57 +109,49 @@ describe('next-fetch', () => {
     );
   });
 
-//   it('should call request, response interceptors', async () => {
-//     // given
-//     const requestInterceptor = (requestArg: RequestInit) => {
-//       return requestArg;
-//     };
-//     const responseInterceptor = (
-//       response: Response,
-//     ): Response | Promise<Response> => {
-//       return response;
-//     };
+  it('should call request, response interceptors', async () => {
+    // given
+    const instance = nextFetch.create({
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      requestInterceptor: mockRequestInterceptor,
+      responseInterceptor: mockResponseInterceptor,
+    });
 
-//     const instance = nextFetch.create({
-//       headers: {
-//         'Content-Type': 'application/json',
-//         Accept: 'application/json',
-//       },
-//       requestInterceptor: requestInterceptor,
-//       responseInterceptor: responseInterceptor,
-//     });
+    // when
+    await instance.get('https://jsonplaceholder.typicode.com/todos/1', {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-//     // when
-//     await instance.get('https://jsonplaceholder.typicode.com/todos/1', {
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//     });
+    // then
+    expect(mockRequestInterceptor).toHaveBeenCalled();
+    expect(mockResponseInterceptor).toHaveBeenCalled();
+  });
 
-//     // then
-//     expect(requestInterceptor).toHaveBeenCalledWith();
-//     expect(responseInterceptor).toHaveBeenCalled();
-//   });
+  //   it('should throw error', async () => {
+  //     // given
+  //     const instance = nextFetch.create({
+  //       throwError: true,
+  //     });
 
-//   it('should throw error', async () => {
-//     // given
-//     const instance = nextFetch.create({
-//       throwError: true,
-//     });
+  //     expect(
+  //       await instance.get('https://jsonplaceholder.typicode.com/Error/1'),
+  //     ).toThrow();
+  //   });
 
-//     expect(
-//       await instance.get('https://jsonplaceholder.typicode.com/Error/1'),
-//     ).toThrow();
-//   });
-
-//   it('should throw error', async () => {
-//     // given
-//     const instance = nextFetch.create({
-//       responseType: 'json',
-//     });
-//     const data = await instance.get(
-//       'https://jsonplaceholder.typicode.com/Error/1',
-//     );
-//     expect(typeof data).toEqual(typeof JSON);
-//   });
-// });
+  //   it('should throw error', async () => {
+  //     // given
+  //     const instance = nextFetch.create({
+  //       responseType: 'json',
+  //     });
+  //     const data = await instance.get(
+  //       'https://jsonplaceholder.typicode.com/Error/1',
+  //     );
+  //     expect(typeof data).toEqual(typeof JSON);
+  //   });
+  // });
+});
