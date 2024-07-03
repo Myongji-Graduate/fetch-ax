@@ -145,7 +145,7 @@ describe('next-fetch', () => {
     expect(result.data).toEqual(undefined);
   });
 
-  it('should throw error', async () => {
+  it('should response type json', async () => {
     // given
     const instance = nextFetch.create({
       responseType: 'json',
