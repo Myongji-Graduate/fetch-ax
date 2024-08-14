@@ -153,9 +153,9 @@ describe('next-fetch-error', () => {
 
   beforeEach(() => {
     fetchMocked = jest.fn().mockResolvedValue({
-      status: 404,
+      status: 300,
       json: jest.fn().mockResolvedValue({
-        error: 'Not Found',
+        error: 'Multiple choices available',
       }),
     });
 
