@@ -105,7 +105,7 @@ const processReturnResponse = async <T = any>(
  */
 export type FetchArgs = [string | URL, RequestInit | undefined];
 
-interface RequestInit {
+export interface RequestInit {
   /** next fetch does not have a method attribute because it has http request method. */
 
   /** A BodyInit object or null to set request's body. */
@@ -188,14 +188,13 @@ const applyDefaultOptionsArgs = (
     });
   }
 
-  if (requestInit?.data && !isBodyInit(requestInit?.data)) {
-    requestInit.data = JSON.stringify(requestInit.data);
-  }
-  let requestArgs: RequestInit = {
-    ...defaultOptions,
-    ...requestInit,
-    headers: requestHeaders,
-  };
+  let requestArgs = requestHeaders
+    ? {
+        ...defaultOptions,
+        ...requestInit,
+        headers: requestHeaders,
+      }
+    : { ...defaultOptions, ...requestInit };
 
   if (!requestArgs.throwError) {
     requestArgs.throwError = defaultOptions?.throwError
@@ -377,10 +376,10 @@ export const nextFetch = {
           defaultOptions,
         );
 
-        let response = await fetch(requestUrl, {
+        let response = (await fetch(requestUrl, {
           ...requestArgs,
           method: 'HEAD',
-        });
+        })) as unknown as Response;
 
         if (requestArgs?.throwError) httpErrorHandling(response);
 
