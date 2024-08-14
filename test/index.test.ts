@@ -38,7 +38,7 @@ describe('next-fetch', () => {
     global.fetch = globalFetch;
   });
 
-  it('should call global fetch when no default options.', async () => {
+  it('should call next fetch default option when default option is not specified.', async () => {
     // given
     const instance = nextFetch.create();
 
