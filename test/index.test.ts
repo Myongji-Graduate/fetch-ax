@@ -132,19 +132,6 @@ describe('next-fetch', () => {
     expect(mockResponseInterceptor).toHaveBeenCalled();
   });
 
-  it('should throw error', async () => {
-    // given
-    const instance = nextFetch.create({
-      throwError: true,
-    });
-    // when
-    const result = await instance.get(
-      'https://jsonplaceholder.typicode.com/Error/1',
-    );
-    // then
-    expect(result.data).toEqual(undefined);
-  });
-
   it('should response type json', async () => {
     // given
     const instance = nextFetch.create({
@@ -157,5 +144,45 @@ describe('next-fetch', () => {
     );
     //then
     expect(typeof data).toEqual(typeof JSON);
+  });
+});
+
+describe('next-fetch-error', () => {
+  const globalFetch = global.fetch;
+  let fetchMocked: jest.Mock;
+
+  beforeEach(() => {
+    fetchMocked = jest.fn().mockResolvedValue({
+      status: 404,
+      json: jest.fn().mockResolvedValue({
+        error: 'Not Found',
+      }),
+    });
+
+    // @ts-ignore
+    global.fetch = fetchMocked;
+  });
+
+  afterEach(() => {
+    // @ts-ignore
+    global.fetch = globalFetch;
+  });
+
+  it('should throw error', async () => {
+    // given
+    const instance = nextFetch.create({
+      throwError: true,
+    });
+    let error;
+
+    // when
+    try {
+      await instance.get('https://jsonplaceholder.typicode.com/Error/1');
+    } catch (e) {
+      error = e;
+    }
+
+    // then
+    expect(error).toBeDefined();
   });
 });
