@@ -168,7 +168,7 @@ describe('next-fetch-error', () => {
     global.fetch = globalFetch;
   });
 
-  it('should throw error', async () => {
+  it('should throw error above status 300.', async () => {
     // given
     const instance = nextFetch.create({
       throwError: true,
