@@ -1,12 +1,16 @@
-import { nextFetch } from '../src';
+import fetchAX from "../src";
 
-// response type default value is json
-const instance = nextFetch.create();
+const instance = fetchAX.create();
 
-// response data will apply json parse
+// This does not parse the response   
 const response = instance.get('/');
 
+// response data type is json 
+const responseWithJson = instance.get('/', {
+  responseType: 'json',
+});
+
 // response data type is form data
-const responseWithChangedResponseType = instance.get('/', {
+const responseWithFormData = instance.get('/', {
   responseType: 'formdata',
 });

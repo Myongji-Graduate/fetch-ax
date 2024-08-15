@@ -1,4 +1,17 @@
-import { httpErrorHandling } from './error';
+class fetchAxError extends Error {
+  constructor(
+    readonly statusCode: number,
+    readonly response: Response,
+  ) {
+    super();
+    this.statusCode = statusCode;
+    this.response = response;
+  }
+}
+
+export const httpErrorHandling = (response: Response) => {
+  if (response.status >= 300) throw new fetchAxError(response.status, response);
+};
 
 type FetchAXResponse<T = any> = {
   data: T;

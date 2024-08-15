@@ -1,6 +1,6 @@
-import { nextFetch } from '../src';
+import fetchAX from "../src";
 
-const instance = nextFetch.create({ throwError: true });
+const instance = fetchAX.create({ throwError: true });
 
 // error handling will not apply
 const errorHandlingFalseResponse = instance.get('/', { throwError: false });

@@ -4,6 +4,7 @@
   "description": "",
   "types": "./lib/cjs/types/index.d.ts",
   "main": "./lib/cjs/index.js",
+  "type":"module",
   "scripts": {
     "test": "jest",
     "clean": "rm -rf ./lib",

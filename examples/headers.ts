@@ -1,8 +1,9 @@
-import { nextFetch } from '../src';
 
 // Content-Type default value is application-json
+import fetchAX from "../src";
+
 // But Content-Type value changed due to default options
-const instance = nextFetch.create({
+const instance = fetchAX.create({
   headers: {
     'Content-Type': 'text/plain',
   },

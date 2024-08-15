@@ -1,7 +1,7 @@
-import { nextFetch } from '../src';
+import fetchAX, { RequestInit } from '../src';
 
-const instance = nextFetch.create({
-  responseInterceptor: (response: Response) => {
+const instance = fetchAX.create({
+  responseInterceptor: (response: any) => {
     console.log('default options response interceptor');
     return response;
   },
@@ -23,8 +23,10 @@ const response = instance.get('/', {
     console.log('requestInit reqeust interceptor');
     return requestArg;
   },
-  responseInterceptor: (response: Response) => {
+  responseInterceptor: (response: any) => {
     console.log('requestInit response interceptor');
     return response;
   },
 });
+
+console.log(response)

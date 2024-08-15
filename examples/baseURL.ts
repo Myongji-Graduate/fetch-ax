@@ -1,7 +1,7 @@
-import { nextFetch } from '../src';
+import fetchAX from '../src';
 
 // set baseUrl
-const instance = nextFetch.create({
+const instance = fetchAX.create({
   baseURL: 'http://localhost:3000',
 });
 
