@@ -1,6 +1,6 @@
 import { httpErrorHandling } from './error';
 
-type NextResponse<T = any> = {
+type FetchAXResponse<T = any> = {
   data: T;
   status: number;
   statusText: string;
@@ -15,7 +15,7 @@ type ResponseType =
   | 'stream'
   | 'formdata';
 
-export type NextFetchDefaultOptions = {
+export type FetchAXDefaultOptions = {
   /**
    * Base URL of fetch. It will be used when the first argument of fetch is relative URL.
    *
@@ -106,7 +106,7 @@ const processReturnResponse = async <T = any>(
 export type FetchArgs = [string | URL, RequestInit | undefined];
 
 export interface RequestInit {
-  /** next fetch does not have a method attribute because it has http request method. */
+  /** fetch-ax does not have a method attribute because it has http request method. */
 
   /** A BodyInit object or null to set request's body. */
   data?: BodyInit | Record<string, any>;
@@ -170,7 +170,7 @@ const isBodyInit = (data: any): data is BodyInit => {
 
 const applyDefaultOptionsArgs = (
   [url, requestInit]: FetchArgs,
-  defaultOptions?: NextFetchDefaultOptions,
+  defaultOptions?: FetchAXDefaultOptions,
 ): FetchArgs => {
   const requestUrl: FetchArgs[0] = defaultOptions?.baseURL
     ? new URL(url, defaultOptions.baseURL)
@@ -212,13 +212,13 @@ const applyDefaultOptionsArgs = (
   return [requestUrl, requestArgs];
 };
 
-export const nextFetch = {
-  create: (defaultOptions?: NextFetchDefaultOptions) => {
+const fetchAX = {
+  create: (defaultOptions?: FetchAXDefaultOptions) => {
     const instance = {
       async get<T = any>(
         url: string | URL,
         args?: RequestInit,
-      ): Promise<NextResponse<T>> {
+      ): Promise<FetchAXResponse<T>> {
         const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
           [url, args],
           defaultOptions,
@@ -248,7 +248,7 @@ export const nextFetch = {
       async post<T = any>(
         url: string | URL,
         args?: RequestInit,
-      ): Promise<NextResponse<T>> {
+      ): Promise<FetchAXResponse<T>> {
         const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
           [url, args],
           defaultOptions,
@@ -278,7 +278,7 @@ export const nextFetch = {
       async put<T = any>(
         url: string | URL,
         args?: RequestInit,
-      ): Promise<NextResponse<T>> {
+      ): Promise<FetchAXResponse<T>> {
         const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
           [url, args],
           defaultOptions,
@@ -309,7 +309,7 @@ export const nextFetch = {
       async delete<T = any>(
         url: string | URL,
         args?: RequestInit,
-      ): Promise<NextResponse<T>> {
+      ): Promise<FetchAXResponse<T>> {
         const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
           [url, args],
           defaultOptions,
@@ -339,7 +339,7 @@ export const nextFetch = {
       async patch<T = any>(
         url: string | URL,
         args?: RequestInit,
-      ): Promise<NextResponse<T>> {
+      ): Promise<FetchAXResponse<T>> {
         const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
           [url, args],
           defaultOptions,
@@ -370,7 +370,7 @@ export const nextFetch = {
       async head<T = any>(
         url: string | URL,
         args?: RequestInit,
-      ): Promise<NextResponse<T>> {
+      ): Promise<FetchAXResponse<T>> {
         const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
           [url, args],
           defaultOptions,
@@ -400,3 +400,4 @@ export const nextFetch = {
     return instance;
   },
 };
+export default fetchAX;
