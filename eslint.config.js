@@ -5,16 +5,6 @@ module.exports = {
     node: true,
   },
   extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
-  overrides: [
-    {
-      env: {
-        node: true,
-      },
-      parserOptions: {
-        sourceType: 'script',
-      },
-    },
-  ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 'latest',
@@ -24,4 +14,15 @@ module.exports = {
   rules: {
     '@typescript-eslint/no-unused-vars': 'warn',
   },
+  overrides: [
+    {
+      files: ['*.config.js'],
+      env: {
+        node: true,
+      },
+      parserOptions: {
+        sourceType: 'script',
+      },
+    },
+  ],
 };
