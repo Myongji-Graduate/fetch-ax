@@ -136,12 +136,9 @@ console.log(response)
 
 | Property | Description | Type | Default |
 | --- | --- | --- | --- |
-| baseURL | base url  | string | URL | - |
-| headers | fetch headers | HeadersInit | - |
-| throwError | whether to throw an error | boolean | false |
-| responseType | response type to parse | ResponseType | - |
-| responseInterceptor | interceptor to be executed
-on response | (response: Response) => Response 
-| Promise<Response> | - |
-| requestInterceptor | interceptor to be executed
-on request | (requestArg: RequestInit) => RequestInit; | - |
+| baseURL | base url  | `string \| URL`  | - |
+| headers | fetch headers | `HeadersInit`  | - |
+| throwError | whether to throw an error | `boolean`  | false |
+| responseType | response type to parse | `ResponseType`  | - |
+| responseInterceptor | interceptor to be executed on response |  `(response: Response) => Response \| (response: Response) => Promise<Response>`  | - |
+| requestInterceptor | interceptor to be executed on request | `(requestArg: RequestInit) => RequestInit`  | - |
