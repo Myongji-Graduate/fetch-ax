@@ -246,6 +246,27 @@ describe('next-fetch-error', () => {
         expect(error.message).toBe('Bad Request');
       }
     });
+
+    it('throw promise custom error', async () => {
+      const instance = fetchAX.create({
+        throwError: true,
+        responseRejectedInterceptor: (error) => {
+          if (error.statusCode === 300) {
+            throw new BadRequestError({
+              message: 'Bad Request',
+              response: error.response,
+            });
+          }
+        },
+      });
+
+      try {
+        await instance.get('https://jsonplaceholder.typicode.com/Error/1');
+      } catch (error) {
+        expect(error).toBeInstanceOf(BadRequestError);
+        expect(error.message).toBe('Bad Request');
+      }
+    });
   });
 });
 
