@@ -360,7 +360,8 @@ const fetchAX = {
           method: 'DELETE',
         });
 
-        if (requestArgs?.throwError) httpErrorHandling(response);
+        if (requestArgs?.throwError || isHttpError(response))
+          return await httpErrorHandling(response, defaultOptions, requestArgs);
 
         if (defaultOptions?.responseInterceptor) {
           response = await defaultOptions.responseInterceptor(response);
