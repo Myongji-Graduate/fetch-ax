@@ -252,7 +252,7 @@ const fetchAX = {
           method: 'GET',
         });
 
-        if (requestArgs?.throwError) httpErrorHandling(response);
+          return await httpErrorHandling(response, defaultOptions, requestArgs);
 
         if (defaultOptions?.responseInterceptor) {
           response = await defaultOptions.responseInterceptor(response);
