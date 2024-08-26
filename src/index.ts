@@ -155,6 +155,8 @@ export interface RequestInit {
   window?: null;
   /** Response Interceptor of fetch. It will be called after response */
   responseInterceptor?: (response: Response) => Response | Promise<Response>;
+  /** Response Interceptor of fetch. It will be called after response When the status is 300 or more */
+  responseRejectedInterceptor?: (error: fetchAxError) => any;
   /** Request Interceptor of fetch. It will be called before request */
   requestInterceptor?: (requestArg: RequestInit) => RequestInit;
   /** Throw Error of fetch. If the throwError attribute is true, throw an error when the status is 300 or more */
