@@ -267,7 +267,6 @@ const fetchAX = {
           method: 'GET',
         });
 
-        // if (requestArgs?.throwError) httpErrorHandling(response);
         if (requestArgs?.throwError || isHttpError(response))
           return await httpErrorHandling(response, defaultOptions, requestArgs);
 
@@ -300,7 +299,8 @@ const fetchAX = {
           body: requestArgs?.data ? (requestArgs.data as BodyInit) : null,
         });
 
-        if (requestArgs?.throwError) httpErrorHandling(response);
+        if (requestArgs?.throwError || isHttpError(response))
+          return await httpErrorHandling(response, defaultOptions, requestArgs);
 
         if (defaultOptions?.responseInterceptor) {
           response = await defaultOptions.responseInterceptor(response);
