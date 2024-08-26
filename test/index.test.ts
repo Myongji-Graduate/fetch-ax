@@ -1,4 +1,4 @@
-import { nextFetch, RequestInit } from '../src';
+import { default as fetchAX, fetchAxError, RequestInit } from '../src';
 
 describe('next-fetch', () => {
   const globalFetch = global.fetch;
@@ -40,7 +40,7 @@ describe('next-fetch', () => {
 
   it('should call next fetch default option when default option is not specified.', async () => {
     // given
-    const instance = nextFetch.create();
+    const instance = fetchAX.create();
 
     // when
     await instance.get('https://jsonplaceholder.typicode.com/todos/1');
@@ -59,7 +59,7 @@ describe('next-fetch', () => {
 
   it('should apply default headers.', async () => {
     // given
-    const instance = nextFetch.create({
+    const instance = fetchAX.create({
       headers: {
         'Content-Type': 'application/json',
         accept: 'application/json',
@@ -85,7 +85,7 @@ describe('next-fetch', () => {
 
   it('should override default headers', async () => {
     // given
-    const instance = nextFetch.create({
+    const instance = fetchAX.create({
       headers: {
         'Content-Type': 'text/plain',
       },
@@ -111,7 +111,7 @@ describe('next-fetch', () => {
 
   it('should call request, response interceptors', async () => {
     // given
-    const instance = nextFetch.create({
+    const instance = fetchAX.create({
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
@@ -134,7 +134,7 @@ describe('next-fetch', () => {
 
   it('should response type json', async () => {
     // given
-    const instance = nextFetch.create({
+    const instance = fetchAX.create({
       responseType: 'json',
     });
 
@@ -170,7 +170,7 @@ describe('next-fetch-error', () => {
 
   it('should throw error above status 300.', async () => {
     // given
-    const instance = nextFetch.create({
+    const instance = fetchAX.create({
       throwError: true,
     });
     let error;
@@ -183,6 +183,53 @@ describe('next-fetch-error', () => {
     }
 
     // then
-    expect(error).toBeDefined();
+    expect(error).toBeInstanceOf(fetchAxError);
   });
+  describe('interceptor', () => {
+    it('return promise reject error', async () => {
+      const instance = fetchAX.create({
+        throwError: true,
+        responseRejectedInterceptor: (error) => {
+          if (error.statusCode === 300) {
+            return Promise.reject({ error: 'error' });
+          }
+        },
+      });
+
+      try {
+        await instance.get('https://jsonplaceholder.typicode.com/Error/1');
+      } catch (error) {
+        expect(error).toEqual({
+          error: 'error',
+        });
+      }
+    });
+
 });
+
+class HttpError extends Error {
+  constructor(
+    readonly statusCode?: number,
+    message?: string,
+    readonly response?: Response,
+  ) {
+    super(message);
+  }
+}
+
+type ErrorConstrutor = {
+  message?: string;
+  statusCode?: number;
+  response?: Response;
+};
+
+class BadRequestError extends HttpError {
+  constructor({
+    message = 'Bad Request',
+    statusCode = 400,
+    response,
+  }: ErrorConstrutor) {
+    super(statusCode, message, response);
+    this.name = 'BadRequestError';
+  }
+}
