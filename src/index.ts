@@ -9,8 +9,20 @@ export class fetchAxError extends Error {
   }
 }
 
-export const httpErrorHandling = (response: Response) => {
-  if (response.status >= 300) throw new fetchAxError(response.status, response);
+export const httpErrorHandling = async (
+  response: Response,
+  defaultOptions?: FetchAXDefaultOptions,
+  requestArgs?: RequestInit,
+) => {
+  let error = new fetchAxError(response.status, response);
+  if (defaultOptions?.responseRejectedInterceptor) {
+    error = await defaultOptions.responseRejectedInterceptor(error);
+  }
+  if (requestArgs?.responseRejectedInterceptor) {
+    error = await requestArgs.responseRejectedInterceptor(error);
+  }
+
+  return Promise.reject(error);
 };
 
 type FetchAXResponse<T = any> = {
@@ -233,7 +245,10 @@ const applyDefaultOptionsArgs = (
 
   return [requestUrl, requestArgs];
 };
+
 function isHttpError(response: Response) {
+  return response.status >= 300 ? true : false;
+}
 
 const fetchAX = {
   create: (defaultOptions?: FetchAXDefaultOptions) => {
@@ -252,6 +267,8 @@ const fetchAX = {
           method: 'GET',
         });
 
+        // if (requestArgs?.throwError) httpErrorHandling(response);
+        if (requestArgs?.throwError || isHttpError(response))
           return await httpErrorHandling(response, defaultOptions, requestArgs);
 
         if (defaultOptions?.responseInterceptor) {
