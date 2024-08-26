@@ -233,6 +233,7 @@ const applyDefaultOptionsArgs = (
 
   return [requestUrl, requestArgs];
 };
+function isHttpError(response: Response) {
 
 const fetchAX = {
   create: (defaultOptions?: FetchAXDefaultOptions) => {
