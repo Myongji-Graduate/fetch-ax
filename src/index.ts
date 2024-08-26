@@ -1,4 +1,4 @@
-class fetchAxError extends Error {
+export class fetchAxError extends Error {
   constructor(
     readonly statusCode: number,
     readonly response: Response,
@@ -62,6 +62,13 @@ export type FetchAXDefaultOptions = {
    * @public
    */
   responseInterceptor?: (response: Response) => Response | Promise<Response>;
+
+  /**
+   * Response Interceptor of fetch. It will be called after response When the status is 300 or more
+   *
+   * @public
+   */
+  responseRejectedInterceptor?: (error: fetchAxError) => any;
 
   /**
    * Response Interceptor of fetch. It will be called after response
