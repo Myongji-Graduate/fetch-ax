@@ -57,7 +57,7 @@ export type FetchAXDefaultOptions = {
 
   responseType?: ResponseType;
   /**
-   * Request Interceptor of fetch. It will be called before request
+   * Response Interceptor of fetch. It will be called after response
    *
    * @public
    */
@@ -71,7 +71,7 @@ export type FetchAXDefaultOptions = {
   responseRejectedInterceptor?: (error: fetchAxError) => any;
 
   /**
-   * Response Interceptor of fetch. It will be called after response
+   * Request Interceptor of fetch. It will be called before request
    *
    * @public
    */
