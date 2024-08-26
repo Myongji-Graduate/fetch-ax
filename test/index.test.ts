@@ -204,6 +204,25 @@ describe('next-fetch-error', () => {
         });
       }
     });
+
+    it('throw reject error', async () => {
+      const instance = fetchAX.create({
+        throwError: true,
+        responseRejectedInterceptor: (error) => {
+          if (error.statusCode === 300) {
+            throw { error: 'error' };
+          }
+        },
+      });
+
+      try {
+        await instance.get('https://jsonplaceholder.typicode.com/Error/1');
+      } catch (error) {
+        expect(error).toEqual({
+          error: 'error',
+        });
+      }
+    });
   });
 });
 
