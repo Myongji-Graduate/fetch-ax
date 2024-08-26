@@ -204,7 +204,7 @@ describe('next-fetch-error', () => {
         });
       }
     });
-
+  });
 });
 
 class HttpError extends Error {
