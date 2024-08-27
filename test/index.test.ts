@@ -210,6 +210,7 @@ describe('interceptor', () => {
     });
 
     it('should return response', async () => {
+      // given
       const instance = fetchAX.create({
         responseType: 'json',
         responseInterceptor: (response) => {
@@ -217,10 +218,12 @@ describe('interceptor', () => {
         },
       });
 
+      // when
       const response = await instance.get(
         'https://jsonplaceholder.typicode.com/todos/1',
       );
 
+      // then
       expect(response.data).toEqual({
         userId: 1,
         id: 1,
@@ -252,6 +255,7 @@ describe('interceptor', () => {
     });
 
     it('return promise reject error', async () => {
+      // given
       const instance = fetchAX.create({
         throwError: true,
         responseRejectedInterceptor: (error) => {
@@ -262,8 +266,10 @@ describe('interceptor', () => {
       });
 
       try {
+        // when
         await instance.get('https://jsonplaceholder.typicode.com/Error/1');
       } catch (error) {
+        // then
         expect(error).toEqual({
           error: 'error',
         });
@@ -271,6 +277,7 @@ describe('interceptor', () => {
     });
 
     it('throw reject error', async () => {
+      // given
       const instance = fetchAX.create({
         throwError: true,
         responseRejectedInterceptor: (error) => {
@@ -281,8 +288,10 @@ describe('interceptor', () => {
       });
 
       try {
+        // when
         await instance.get('https://jsonplaceholder.typicode.com/Error/1');
       } catch (error) {
+        // theb
         expect(error).toEqual({
           error: 'error',
         });
@@ -290,6 +299,7 @@ describe('interceptor', () => {
     });
 
     it('return object', async () => {
+      // given
       const instance = fetchAX.create({
         throwError: true,
         responseRejectedInterceptor: (error) => {
@@ -300,8 +310,10 @@ describe('interceptor', () => {
       });
 
       try {
+        // when
         await instance.get('https://jsonplaceholder.typicode.com/Error/1');
       } catch (error) {
+        // then
         expect(error).toEqual({
           error: 'error',
         });
@@ -309,6 +321,7 @@ describe('interceptor', () => {
     });
 
     it('chain interceptor', async () => {
+      // given
       const instance = fetchAX.create({
         throwError: true,
         responseRejectedInterceptor: (error) => {
@@ -319,6 +332,7 @@ describe('interceptor', () => {
       });
 
       try {
+        // when
         await instance.get('https://jsonplaceholder.typicode.com/Error/1', {
           responseRejectedInterceptor: (error) => {
             if (error.error === 'chain') {
@@ -327,6 +341,7 @@ describe('interceptor', () => {
           },
         });
       } catch (error) {
+        // then
         expect(error).toEqual({
           error: 'chain-error',
         });
@@ -334,6 +349,7 @@ describe('interceptor', () => {
     });
 
     it('return promise custom error', async () => {
+      // given
       const instance = fetchAX.create({
         throwError: true,
         responseRejectedInterceptor: (error) => {
@@ -349,14 +365,17 @@ describe('interceptor', () => {
       });
 
       try {
+        // when
         await instance.get('https://jsonplaceholder.typicode.com/Error/1');
       } catch (error) {
+        // then
         expect(error).toBeInstanceOf(BadRequestError);
         expect(error.message).toBe('Bad Request');
       }
     });
 
     it('throw promise custom error', async () => {
+      // given
       const instance = fetchAX.create({
         throwError: true,
         responseRejectedInterceptor: (error) => {
@@ -370,8 +389,10 @@ describe('interceptor', () => {
       });
 
       try {
+        // when
         await instance.get('https://jsonplaceholder.typicode.com/Error/1');
       } catch (error) {
+        // then
         expect(error).toBeInstanceOf(BadRequestError);
         expect(error.message).toBe('Bad Request');
       }
