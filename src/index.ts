@@ -1,3 +1,6 @@
+import { chainInterceptor, mergeOptions } from './merge';
+import { presetOptions } from './preset-options';
+
 export class FetchAxError extends Error {
   constructor(
     readonly statusCode: number,
@@ -203,6 +206,8 @@ const applyDefaultOptionsArgs = (
   [url, requestInit]: FetchArgs,
   defaultOptions?: FetchAXDefaultOptions,
 ): FetchArgs => {
+  defaultOptions = mergeOptions(presetOptions, defaultOptions ?? {});
+
   const requestUrl: FetchArgs[0] = defaultOptions?.baseURL
     ? new URL(url, defaultOptions.baseURL)
     : url;
@@ -254,21 +259,6 @@ const applyDefaultOptionsArgs = (
 
 function isHttpError(response: Response) {
   return response.status >= 300;
-}
-
-function chainInterceptor<T>(
-  ...interceptors: (((arg: T) => Promise<T> | T) | undefined)[]
-): ((arg: T) => Promise<T>) | undefined {
-  if (interceptors.filter((interceptor) => interceptor).length === 0) return;
-  return async (arg: T) => {
-    let result = arg;
-    for (let interceptor of interceptors) {
-      if (interceptor && typeof interceptor === 'function') {
-        result = await interceptor(result);
-      }
-    }
-    return result;
-  };
 }
 
 const fetchAX = {
@@ -445,6 +435,13 @@ const fetchAX = {
       },
     };
     return instance;
+  },
+
+  async get<T = any>(
+    url: string | URL,
+    args?: RequestInit,
+  ): Promise<FetchAXResponse<T>> {
+    return this.create().get(url, args);
   },
 };
 export default fetchAX;
