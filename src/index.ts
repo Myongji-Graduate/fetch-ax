@@ -1,4 +1,4 @@
-export class fetchAxError extends Error {
+export class FetchAxError extends Error {
   constructor(
     readonly statusCode: number,
     readonly response: Response,
@@ -13,7 +13,7 @@ export const httpErrorHandling = async (
   response: Response,
   requestArgs?: RequestInit,
 ) => {
-  let error = new fetchAxError(response.status, response);
+  let error = new FetchAxError(response.status, response);
 
   if (requestArgs?.responseRejectedInterceptor) {
     error = await requestArgs.responseRejectedInterceptor(error);

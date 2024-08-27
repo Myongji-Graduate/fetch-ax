@@ -1,4 +1,4 @@
-import { default as fetchAX, fetchAxError, RequestInit } from '../src';
+import { default as fetchAX, FetchAxError, RequestInit } from '../src';
 
 describe('next-fetch', () => {
   const globalFetch = global.fetch;
@@ -183,7 +183,7 @@ describe('next-fetch-error', () => {
     }
 
     // then
-    expect(error).toBeInstanceOf(fetchAxError);
+    expect(error).toBeInstanceOf(FetchAxError);
   });
 });
 
