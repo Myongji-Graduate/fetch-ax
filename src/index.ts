@@ -240,6 +240,10 @@ const applyDefaultOptionsArgs = (
     requestArgs = requestInit.requestInterceptor(requestArgs);
   }
 
+  requestArgs.responseInterceptor = chainInterceptor(
+    defaultOptions?.responseInterceptor,
+    requestInit?.responseInterceptor,
+  );
   requestArgs.responseRejectedInterceptor = chainInterceptor(
     defaultOptions?.responseRejectedInterceptor,
     requestInit?.responseRejectedInterceptor,
@@ -287,9 +291,6 @@ const fetchAX = {
         if (requestArgs?.throwError || isHttpError(response))
           return await httpErrorHandling(response, requestArgs);
 
-        if (defaultOptions?.responseInterceptor) {
-          response = await defaultOptions.responseInterceptor(response);
-        }
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         }
@@ -319,9 +320,6 @@ const fetchAX = {
         if (requestArgs?.throwError || isHttpError(response))
           return await httpErrorHandling(response, requestArgs);
 
-        if (defaultOptions?.responseInterceptor) {
-          response = await defaultOptions.responseInterceptor(response);
-        }
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         }
@@ -350,9 +348,6 @@ const fetchAX = {
         if (requestArgs?.throwError || isHttpError(response))
           return await httpErrorHandling(response, requestArgs);
 
-        if (defaultOptions?.responseInterceptor) {
-          response = await defaultOptions.responseInterceptor(response);
-        }
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         }
@@ -381,9 +376,6 @@ const fetchAX = {
         if (requestArgs?.throwError || isHttpError(response))
           return await httpErrorHandling(response, requestArgs);
 
-        if (defaultOptions?.responseInterceptor) {
-          response = await defaultOptions.responseInterceptor(response);
-        }
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         }
@@ -413,9 +405,6 @@ const fetchAX = {
         if (requestArgs?.throwError || isHttpError(response))
           return await httpErrorHandling(response, requestArgs);
 
-        if (defaultOptions?.responseInterceptor) {
-          response = await defaultOptions.responseInterceptor(response);
-        }
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         }
@@ -444,9 +433,6 @@ const fetchAX = {
         if (requestArgs?.throwError || isHttpError(response))
           return await httpErrorHandling(response, requestArgs);
 
-        if (defaultOptions?.responseInterceptor) {
-          response = await defaultOptions.responseInterceptor(response);
-        }
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         }
