@@ -188,11 +188,47 @@ describe('next-fetch-error', () => {
 });
 
 describe('interceptor', () => {
-  // describe('response-interceptor', () => {
-  //   it('should return response', async () => {
+  describe('response-interceptor', () => {
+    let fetchMocked: jest.Mock;
+    const globalFetch = global.fetch;
 
-  //   });
-  // });
+    beforeEach(() => {
+      fetchMocked = jest.fn().mockResolvedValue({
+        json: jest.fn().mockResolvedValue({
+          userId: 1,
+          id: 1,
+          title: 'delectus aut autem',
+          completed: false,
+        }),
+      });
+
+      global.fetch = fetchMocked;
+    });
+    afterEach(() => {
+      // @ts-ignore
+      global.fetch = globalFetch;
+    });
+
+    it('should return response', async () => {
+      const instance = fetchAX.create({
+        responseType: 'json',
+        responseInterceptor: (response) => {
+          return response;
+        },
+      });
+
+      const response = await instance.get(
+        'https://jsonplaceholder.typicode.com/todos/1',
+      );
+
+      expect(response.data).toEqual({
+        userId: 1,
+        id: 1,
+        title: 'delectus aut autem',
+        completed: false,
+      });
+    });
+  });
 
   describe('response-rejected-interceptor', () => {
     const globalFetch = global.fetch;
