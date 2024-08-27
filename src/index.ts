@@ -253,7 +253,7 @@ const applyDefaultOptionsArgs = (
 };
 
 function isHttpError(response: Response) {
-  return response.status >= 300 ? true : false;
+  return response.status >= 300;
 }
 
 function chainInterceptor<T>(
