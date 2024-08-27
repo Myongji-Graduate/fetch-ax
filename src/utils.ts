@@ -1,9 +1,9 @@
-import { FetchAXDefaultOptions } from '.';
+import { FetchAXDefaultOptions } from './index.js';
 
 export function mergeOptions(
-  ...args: FetchAXDefaultOptions[]
+  ...args: Record<string, any>[]
 ): FetchAXDefaultOptions {
-  const result: FetchAXDefaultOptions = { ...args[0] };
+  const result: Record<string, any> = { ...args[0] };
 
   for (let i = 1; i < args.length; i++) {
     const props = args[i];
