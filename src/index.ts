@@ -1,4 +1,4 @@
-import { chainInterceptor, mergeOptions } from './merge';
+import { chainInterceptor, mergeOptions } from './utils';
 import { presetOptions } from './preset-options';
 
 export class FetchAxError extends Error {
@@ -211,6 +211,8 @@ const applyDefaultOptionsArgs = (
   const requestUrl: FetchArgs[0] = defaultOptions?.baseURL
     ? new URL(url, defaultOptions.baseURL)
     : url;
+
+  // requestUrl.search
 
   const requestHeaders = new Headers([['Content-Type', 'application/json']]);
   if (defaultOptions?.headers) {
