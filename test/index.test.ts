@@ -185,7 +185,36 @@ describe('next-fetch-error', () => {
     // then
     expect(error).toBeInstanceOf(fetchAxError);
   });
-  describe('interceptor', () => {
+});
+
+describe('interceptor', () => {
+  // describe('response-interceptor', () => {
+  //   it('should return response', async () => {
+
+  //   });
+  // });
+
+  describe('response-rejected-interceptor', () => {
+    const globalFetch = global.fetch;
+    let fetchMocked: jest.Mock;
+
+    beforeEach(() => {
+      fetchMocked = jest.fn().mockResolvedValue({
+        status: 300,
+        json: jest.fn().mockResolvedValue({
+          error: 'Multiple choices available',
+        }),
+      });
+
+      // @ts-ignore
+      global.fetch = fetchMocked;
+    });
+
+    afterEach(() => {
+      // @ts-ignore
+      global.fetch = globalFetch;
+    });
+
     it('return promise reject error', async () => {
       const instance = fetchAX.create({
         throwError: true,
@@ -220,6 +249,50 @@ describe('next-fetch-error', () => {
       } catch (error) {
         expect(error).toEqual({
           error: 'error',
+        });
+      }
+    });
+
+    it('return object', async () => {
+      const instance = fetchAX.create({
+        throwError: true,
+        responseRejectedInterceptor: (error) => {
+          if (error.statusCode === 300) {
+            return { error: 'error' };
+          }
+        },
+      });
+
+      try {
+        await instance.get('https://jsonplaceholder.typicode.com/Error/1');
+      } catch (error) {
+        expect(error).toEqual({
+          error: 'error',
+        });
+      }
+    });
+
+    it('chain interceptor', async () => {
+      const instance = fetchAX.create({
+        throwError: true,
+        responseRejectedInterceptor: (error) => {
+          if (error.statusCode === 300) {
+            return { error: 'chain' };
+          }
+        },
+      });
+
+      try {
+        await instance.get('https://jsonplaceholder.typicode.com/Error/1', {
+          responseRejectedInterceptor: (error) => {
+            if (error.error === 'chain') {
+              return { error: 'chain-error' };
+            }
+          },
+        });
+      } catch (error) {
+        expect(error).toEqual({
+          error: 'chain-error',
         });
       }
     });
