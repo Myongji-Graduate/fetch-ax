@@ -142,6 +142,8 @@ export interface RequestInit {
 
   /** A BodyInit object or null to set request's body. */
   data?: BodyInit | Record<string, any>;
+  /** A string to set request's referrer policy. */
+  params?: Record<string, any>;
   /** A string indicating how the request will interact with the browser's cache to set request's cache. */
   cache?: RequestCache;
   /** A string indicating whether credentials will be sent with the request always, never, or only when sent to a same-origin URL. Sets request's credentials. */
@@ -208,13 +210,16 @@ const applyDefaultOptionsArgs = (
 ): FetchArgs => {
   defaultOptions = mergeOptions(presetOptions, defaultOptions ?? {});
 
-  const requestUrl: FetchArgs[0] = defaultOptions?.baseURL
+  const requestUrl: URL = defaultOptions?.baseURL
     ? new URL(url, defaultOptions.baseURL)
-    : url;
+    : new URL(url);
 
-  // requestUrl.search
+  const searchParams = new URLSearchParams(requestInit?.params);
+  for (const [key, value] of searchParams) {
+    requestUrl.searchParams.append(key, value);
+  }
 
-  const requestHeaders = new Headers([['Content-Type', 'application/json']]);
+  const requestHeaders = new Headers();
   if (defaultOptions?.headers) {
     new Headers(defaultOptions.headers).forEach((value, key) => {
       requestHeaders.set(key, value);
@@ -256,7 +261,7 @@ const applyDefaultOptionsArgs = (
     requestInit?.responseRejectedInterceptor,
   );
 
-  return [requestUrl, requestArgs];
+  return [requestUrl.toString(), requestArgs];
 };
 
 function isHttpError(response: Response) {
