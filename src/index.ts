@@ -11,13 +11,10 @@ export class fetchAxError extends Error {
 
 export const httpErrorHandling = async (
   response: Response,
-  defaultOptions?: FetchAXDefaultOptions,
   requestArgs?: RequestInit,
 ) => {
   let error = new fetchAxError(response.status, response);
-  if (defaultOptions?.responseRejectedInterceptor) {
-    error = await defaultOptions.responseRejectedInterceptor(error);
-  }
+
   if (requestArgs?.responseRejectedInterceptor) {
     error = await requestArgs.responseRejectedInterceptor(error);
   }
@@ -80,7 +77,7 @@ export type FetchAXDefaultOptions = {
    *
    * @public
    */
-  responseRejectedInterceptor?: (error: fetchAxError) => any;
+  responseRejectedInterceptor?: (error: any) => any;
 
   /**
    * Request Interceptor of fetch. It will be called before request
@@ -168,7 +165,7 @@ export interface RequestInit {
   /** Response Interceptor of fetch. It will be called after response */
   responseInterceptor?: (response: Response) => Response | Promise<Response>;
   /** Response Interceptor of fetch. It will be called after response When the status is 300 or more */
-  responseRejectedInterceptor?: (error: fetchAxError) => any;
+  responseRejectedInterceptor?: (error: any) => any;
   /** Request Interceptor of fetch. It will be called before request */
   requestInterceptor?: (requestArg: RequestInit) => RequestInit;
   /** Throw Error of fetch. If the throwError attribute is true, throw an error when the status is 300 or more */
@@ -288,7 +285,7 @@ const fetchAX = {
         });
 
         if (requestArgs?.throwError || isHttpError(response))
-          return await httpErrorHandling(response, defaultOptions, requestArgs);
+          return await httpErrorHandling(response, requestArgs);
 
         if (defaultOptions?.responseInterceptor) {
           response = await defaultOptions.responseInterceptor(response);
@@ -320,7 +317,7 @@ const fetchAX = {
         });
 
         if (requestArgs?.throwError || isHttpError(response))
-          return await httpErrorHandling(response, defaultOptions, requestArgs);
+          return await httpErrorHandling(response, requestArgs);
 
         if (defaultOptions?.responseInterceptor) {
           response = await defaultOptions.responseInterceptor(response);
@@ -381,7 +378,7 @@ const fetchAX = {
         });
 
         if (requestArgs?.throwError || isHttpError(response))
-          return await httpErrorHandling(response, defaultOptions, requestArgs);
+          return await httpErrorHandling(response, requestArgs);
 
         if (defaultOptions?.responseInterceptor) {
           response = await defaultOptions.responseInterceptor(response);
@@ -413,7 +410,7 @@ const fetchAX = {
         });
 
         if (requestArgs?.throwError || isHttpError(response))
-          return await httpErrorHandling(response, defaultOptions, requestArgs);
+          return await httpErrorHandling(response, requestArgs);
 
         if (defaultOptions?.responseInterceptor) {
           response = await defaultOptions.responseInterceptor(response);
@@ -444,7 +441,7 @@ const fetchAX = {
         })) as unknown as Response;
 
         if (requestArgs?.throwError || isHttpError(response))
-          return await httpErrorHandling(response, defaultOptions, requestArgs);
+          return await httpErrorHandling(response, requestArgs);
 
         if (defaultOptions?.responseInterceptor) {
           response = await defaultOptions.responseInterceptor(response);
