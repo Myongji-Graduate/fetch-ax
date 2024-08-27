@@ -1,4 +1,4 @@
-class fetchAxError extends Error {
+export class FetchAxError extends Error {
   constructor(
     readonly statusCode: number,
     readonly response: Response,
@@ -9,8 +9,17 @@ class fetchAxError extends Error {
   }
 }
 
-export const httpErrorHandling = (response: Response) => {
-  if (response.status >= 300) throw new fetchAxError(response.status, response);
+export const httpErrorHandling = async (
+  response: Response,
+  requestArgs?: RequestInit,
+) => {
+  let error = new FetchAxError(response.status, response);
+
+  if (requestArgs?.responseRejectedInterceptor) {
+    error = await requestArgs.responseRejectedInterceptor(error);
+  }
+
+  return Promise.reject(error);
 };
 
 type FetchAXResponse<T = any> = {
@@ -57,14 +66,21 @@ export type FetchAXDefaultOptions = {
 
   responseType?: ResponseType;
   /**
-   * Request Interceptor of fetch. It will be called before request
+   * Response Interceptor of fetch. It will be called after response
    *
    * @public
    */
   responseInterceptor?: (response: Response) => Response | Promise<Response>;
 
   /**
-   * Response Interceptor of fetch. It will be called after response
+   * Response Interceptor of fetch. It will be called after response When the status is 300 or more
+   *
+   * @public
+   */
+  responseRejectedInterceptor?: (error: any) => any;
+
+  /**
+   * Request Interceptor of fetch. It will be called before request
    *
    * @public
    */
@@ -148,6 +164,8 @@ export interface RequestInit {
   window?: null;
   /** Response Interceptor of fetch. It will be called after response */
   responseInterceptor?: (response: Response) => Response | Promise<Response>;
+  /** Response Interceptor of fetch. It will be called after response When the status is 300 or more */
+  responseRejectedInterceptor?: (error: any) => any;
   /** Request Interceptor of fetch. It will be called before request */
   requestInterceptor?: (requestArg: RequestInit) => RequestInit;
   /** Throw Error of fetch. If the throwError attribute is true, throw an error when the status is 300 or more */
@@ -222,8 +240,36 @@ const applyDefaultOptionsArgs = (
     requestArgs = requestInit.requestInterceptor(requestArgs);
   }
 
+  requestArgs.responseInterceptor = chainInterceptor(
+    defaultOptions?.responseInterceptor,
+    requestInit?.responseInterceptor,
+  );
+  requestArgs.responseRejectedInterceptor = chainInterceptor(
+    defaultOptions?.responseRejectedInterceptor,
+    requestInit?.responseRejectedInterceptor,
+  );
+
   return [requestUrl, requestArgs];
 };
+
+function isHttpError(response: Response) {
+  return response.status >= 300;
+}
+
+function chainInterceptor<T>(
+  ...interceptors: (((arg: T) => Promise<T> | T) | undefined)[]
+): ((arg: T) => Promise<T>) | undefined {
+  if (interceptors.filter((interceptor) => interceptor).length === 0) return;
+  return async (arg: T) => {
+    let result = arg;
+    for (let interceptor of interceptors) {
+      if (interceptor && typeof interceptor === 'function') {
+        result = await interceptor(result);
+      }
+    }
+    return result;
+  };
+}
 
 const fetchAX = {
   create: (defaultOptions?: FetchAXDefaultOptions) => {
@@ -242,11 +288,9 @@ const fetchAX = {
           method: 'GET',
         });
 
-        if (requestArgs?.throwError) httpErrorHandling(response);
+        if (requestArgs?.throwError && isHttpError(response))
+          return await httpErrorHandling(response, requestArgs);
 
-        if (defaultOptions?.responseInterceptor) {
-          response = await defaultOptions.responseInterceptor(response);
-        }
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         }
@@ -273,11 +317,9 @@ const fetchAX = {
           body: requestArgs?.data ? (requestArgs.data as BodyInit) : null,
         });
 
-        if (requestArgs?.throwError) httpErrorHandling(response);
+        if (requestArgs?.throwError && isHttpError(response))
+          return await httpErrorHandling(response, requestArgs);
 
-        if (defaultOptions?.responseInterceptor) {
-          response = await defaultOptions.responseInterceptor(response);
-        }
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         }
@@ -303,11 +345,9 @@ const fetchAX = {
           body: requestArgs?.data ? (requestArgs.data as BodyInit) : null,
         });
 
-        if (requestArgs?.throwError) httpErrorHandling(response);
+        if (requestArgs?.throwError && isHttpError(response))
+          return await httpErrorHandling(response, requestArgs);
 
-        if (defaultOptions?.responseInterceptor) {
-          response = await defaultOptions.responseInterceptor(response);
-        }
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         }
@@ -333,11 +373,9 @@ const fetchAX = {
           method: 'DELETE',
         });
 
-        if (requestArgs?.throwError) httpErrorHandling(response);
+        if (requestArgs?.throwError && isHttpError(response))
+          return await httpErrorHandling(response, requestArgs);
 
-        if (defaultOptions?.responseInterceptor) {
-          response = await defaultOptions.responseInterceptor(response);
-        }
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         }
@@ -364,11 +402,9 @@ const fetchAX = {
           body: requestArgs?.data ? (requestArgs.data as BodyInit) : null,
         });
 
-        if (requestArgs?.throwError) httpErrorHandling(response);
+        if (requestArgs?.throwError && isHttpError(response))
+          return await httpErrorHandling(response, requestArgs);
 
-        if (defaultOptions?.responseInterceptor) {
-          response = await defaultOptions.responseInterceptor(response);
-        }
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         }
@@ -394,11 +430,9 @@ const fetchAX = {
           method: 'HEAD',
         })) as unknown as Response;
 
-        if (requestArgs?.throwError) httpErrorHandling(response);
+        if (requestArgs?.throwError && isHttpError(response))
+          return await httpErrorHandling(response, requestArgs);
 
-        if (defaultOptions?.responseInterceptor) {
-          response = await defaultOptions.responseInterceptor(response);
-        }
         if (requestArgs?.responseInterceptor) {
           response = await requestArgs.responseInterceptor(response);
         }
