@@ -301,10 +301,11 @@ const fetchAX = {
       },
       async post<T = any>(
         url: string | URL,
-        args?: RequestInit,
+        data?: BodyInit | Record<string, any>,
+        args?: Omit<RequestInit, 'data'>,
       ): Promise<FetchAXResponse<T>> {
         const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
-          [url, args],
+          [url, { ...args, data }],
           defaultOptions,
         );
 
@@ -329,10 +330,11 @@ const fetchAX = {
       },
       async put<T = any>(
         url: string | URL,
-        args?: RequestInit,
+        data?: BodyInit | Record<string, any>,
+        args?: Omit<RequestInit, 'data'>,
       ): Promise<FetchAXResponse<T>> {
         const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
-          [url, args],
+          [url, { ...args, data }],
           defaultOptions,
         );
 
@@ -386,10 +388,11 @@ const fetchAX = {
       },
       async patch<T = any>(
         url: string | URL,
-        args?: RequestInit,
+        data?: BodyInit | Record<string, any>,
+        args?: Omit<RequestInit, 'data'>,
       ): Promise<FetchAXResponse<T>> {
         const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
-          [url, args],
+          [url, { ...args, data }],
           defaultOptions,
         );
 
@@ -451,27 +454,30 @@ const fetchAX = {
   },
   async post<T = any>(
     url: string | URL,
-    args?: RequestInit,
+    data?: BodyInit | Record<string, any>,
+    args?: Omit<RequestInit, 'data'>,
   ): Promise<FetchAXResponse<T>> {
-    return this.create().post(url, args);
+    return this.create().post(url, data, args);
   },
   async put<T = any>(
     url: string | URL,
-    args?: RequestInit,
+    data?: BodyInit | Record<string, any>,
+    args?: Omit<RequestInit, 'data'>,
   ): Promise<FetchAXResponse<T>> {
-    return this.create().put(url, args);
+    return this.create().put(url, data, args);
+  },
+  async patch<T = any>(
+    url: string | URL,
+    data?: BodyInit | Record<string, any>,
+    args?: Omit<RequestInit, 'data'>,
+  ): Promise<FetchAXResponse<T>> {
+    return this.create().patch(url, data, args);
   },
   async delete<T = any>(
     url: string | URL,
     args?: RequestInit,
   ): Promise<FetchAXResponse<T>> {
     return this.create().delete(url, args);
-  },
-  async patch<T = any>(
-    url: string | URL,
-    args?: RequestInit,
-  ): Promise<FetchAXResponse<T>> {
-    return this.create().patch(url, args);
   },
   async head<T = any>(
     url: string | URL,
