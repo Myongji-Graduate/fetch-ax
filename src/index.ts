@@ -288,7 +288,7 @@ const fetchAX = {
           method: 'GET',
         });
 
-        if (requestArgs?.throwError || isHttpError(response))
+        if (requestArgs?.throwError && isHttpError(response))
           return await httpErrorHandling(response, requestArgs);
 
         if (requestArgs?.responseInterceptor) {
@@ -317,7 +317,7 @@ const fetchAX = {
           body: requestArgs?.data ? (requestArgs.data as BodyInit) : null,
         });
 
-        if (requestArgs?.throwError || isHttpError(response))
+        if (requestArgs?.throwError && isHttpError(response))
           return await httpErrorHandling(response, requestArgs);
 
         if (requestArgs?.responseInterceptor) {
@@ -345,7 +345,7 @@ const fetchAX = {
           body: requestArgs?.data ? (requestArgs.data as BodyInit) : null,
         });
 
-        if (requestArgs?.throwError || isHttpError(response))
+        if (requestArgs?.throwError && isHttpError(response))
           return await httpErrorHandling(response, requestArgs);
 
         if (requestArgs?.responseInterceptor) {
@@ -373,7 +373,7 @@ const fetchAX = {
           method: 'DELETE',
         });
 
-        if (requestArgs?.throwError || isHttpError(response))
+        if (requestArgs?.throwError && isHttpError(response))
           return await httpErrorHandling(response, requestArgs);
 
         if (requestArgs?.responseInterceptor) {
@@ -402,7 +402,7 @@ const fetchAX = {
           body: requestArgs?.data ? (requestArgs.data as BodyInit) : null,
         });
 
-        if (requestArgs?.throwError || isHttpError(response))
+        if (requestArgs?.throwError && isHttpError(response))
           return await httpErrorHandling(response, requestArgs);
 
         if (requestArgs?.responseInterceptor) {
@@ -430,7 +430,7 @@ const fetchAX = {
           method: 'HEAD',
         })) as unknown as Response;
 
-        if (requestArgs?.throwError || isHttpError(response))
+        if (requestArgs?.throwError && isHttpError(response))
           return await httpErrorHandling(response, requestArgs);
 
         if (requestArgs?.responseInterceptor) {
