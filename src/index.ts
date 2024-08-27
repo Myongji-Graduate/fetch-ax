@@ -443,12 +443,41 @@ const fetchAX = {
     };
     return instance;
   },
-
   async get<T = any>(
     url: string | URL,
     args?: RequestInit,
   ): Promise<FetchAXResponse<T>> {
     return this.create().get(url, args);
+  },
+  async post<T = any>(
+    url: string | URL,
+    args?: RequestInit,
+  ): Promise<FetchAXResponse<T>> {
+    return this.create().post(url, args);
+  },
+  async put<T = any>(
+    url: string | URL,
+    args?: RequestInit,
+  ): Promise<FetchAXResponse<T>> {
+    return this.create().put(url, args);
+  },
+  async delete<T = any>(
+    url: string | URL,
+    args?: RequestInit,
+  ): Promise<FetchAXResponse<T>> {
+    return this.create().delete(url, args);
+  },
+  async patch<T = any>(
+    url: string | URL,
+    args?: RequestInit,
+  ): Promise<FetchAXResponse<T>> {
+    return this.create().patch(url, args);
+  },
+  async head<T = any>(
+    url: string | URL,
+    args?: RequestInit,
+  ): Promise<FetchAXResponse<T>> {
+    return this.create().head(url, args);
   },
 };
 export default fetchAX;
