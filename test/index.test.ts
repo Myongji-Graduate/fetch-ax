@@ -52,7 +52,8 @@ describe('next-fetch', () => {
       {
         headers: new Headers([['Content-Type', 'application/json']]),
         method: 'GET',
-        throwError: false,
+        throwError: true,
+        responseType: 'json',
       },
     );
   });
@@ -74,11 +75,12 @@ describe('next-fetch', () => {
       'https://jsonplaceholder.typicode.com/todos/1',
       {
         headers: new Headers({
-          'Content-Type': 'application/json',
+          'content-Type': 'application/json',
           accept: 'application/json',
         }),
         method: 'GET',
-        throwError: false,
+        throwError: true,
+        responseType: 'json',
       },
     );
   });
@@ -104,7 +106,8 @@ describe('next-fetch', () => {
       {
         headers: new Headers([['Content-Type', 'application/json']]),
         method: 'GET',
-        throwError: false,
+        throwError: true,
+        responseType: 'json',
       },
     );
   });
