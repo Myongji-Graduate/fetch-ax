@@ -243,11 +243,31 @@ const applyDefaultOptionsArgs = (
     requestArgs = requestInit.requestInterceptor(requestArgs);
   }
 
+  requestArgs.responseRejectedInterceptor = chainInterceptor(
+    defaultOptions?.responseRejectedInterceptor,
+    requestInit?.responseRejectedInterceptor,
+  );
+
   return [requestUrl, requestArgs];
 };
 
 function isHttpError(response: Response) {
   return response.status >= 300 ? true : false;
+}
+
+function chainInterceptor<T>(
+  ...interceptors: (((arg: T) => Promise<T> | T) | undefined)[]
+): ((arg: T) => Promise<T>) | undefined {
+  if (interceptors.filter((interceptor) => interceptor).length === 0) return;
+  return async (arg: T) => {
+    let result = arg;
+    for (let interceptor of interceptors) {
+      if (interceptor && typeof interceptor === 'function') {
+        result = await interceptor(result);
+      }
+    }
+    return result;
+  };
 }
 
 const fetchAX = {
