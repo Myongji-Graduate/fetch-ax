@@ -1,4 +1,4 @@
-import { FetchAXDefaultOptions } from './index.js';
+import { FetchAXDefaultOptions } from '.';
 
 export function mergeOptions(
   ...args: Record<string, any>[]

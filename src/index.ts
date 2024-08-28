@@ -1,5 +1,5 @@
-import { chainInterceptor, mergeOptions } from './utils.js';
-import { presetOptions } from './preset-options.js';
+import { chainInterceptor, mergeOptions } from './utils';
+import { presetOptions } from './preset-options';
 
 export class FetchAxError extends Error {
   constructor(
