@@ -1,3 +1,6 @@
+import { chainInterceptor, mergeOptions } from './utils';
+import { presetOptions } from './preset-options';
+
 export class FetchAxError extends Error {
   constructor(
     readonly statusCode: number,
@@ -139,6 +142,8 @@ export interface RequestInit {
 
   /** A BodyInit object or null to set request's body. */
   data?: BodyInit | Record<string, any>;
+  /** A string to set request's referrer policy. */
+  params?: Record<string, any>;
   /** A string indicating how the request will interact with the browser's cache to set request's cache. */
   cache?: RequestCache;
   /** A string indicating whether credentials will be sent with the request always, never, or only when sent to a same-origin URL. Sets request's credentials. */
@@ -203,11 +208,18 @@ const applyDefaultOptionsArgs = (
   [url, requestInit]: FetchArgs,
   defaultOptions?: FetchAXDefaultOptions,
 ): FetchArgs => {
-  const requestUrl: FetchArgs[0] = defaultOptions?.baseURL
-    ? new URL(url, defaultOptions.baseURL)
-    : url;
+  defaultOptions = mergeOptions(presetOptions, defaultOptions ?? {});
 
-  const requestHeaders = new Headers([['Content-Type', 'application/json']]);
+  const requestUrl: URL = defaultOptions?.baseURL
+    ? new URL(url, defaultOptions.baseURL)
+    : new URL(url);
+
+  const searchParams = new URLSearchParams(requestInit?.params);
+  for (const [key, value] of searchParams) {
+    requestUrl.searchParams.append(key, value);
+  }
+
+  const requestHeaders = new Headers();
   if (defaultOptions?.headers) {
     new Headers(defaultOptions.headers).forEach((value, key) => {
       requestHeaders.set(key, value);
@@ -249,26 +261,11 @@ const applyDefaultOptionsArgs = (
     requestInit?.responseRejectedInterceptor,
   );
 
-  return [requestUrl, requestArgs];
+  return [requestUrl.toString(), requestArgs];
 };
 
 function isHttpError(response: Response) {
   return response.status >= 300;
-}
-
-function chainInterceptor<T>(
-  ...interceptors: (((arg: T) => Promise<T> | T) | undefined)[]
-): ((arg: T) => Promise<T>) | undefined {
-  if (interceptors.filter((interceptor) => interceptor).length === 0) return;
-  return async (arg: T) => {
-    let result = arg;
-    for (let interceptor of interceptors) {
-      if (interceptor && typeof interceptor === 'function') {
-        result = await interceptor(result);
-      }
-    }
-    return result;
-  };
 }
 
 const fetchAX = {
@@ -304,10 +301,11 @@ const fetchAX = {
       },
       async post<T = any>(
         url: string | URL,
-        args?: RequestInit,
+        data?: BodyInit | Record<string, any>,
+        args?: Omit<RequestInit, 'data'>,
       ): Promise<FetchAXResponse<T>> {
         const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
-          [url, args],
+          [url, { ...args, data }],
           defaultOptions,
         );
 
@@ -332,10 +330,11 @@ const fetchAX = {
       },
       async put<T = any>(
         url: string | URL,
-        args?: RequestInit,
+        data?: BodyInit | Record<string, any>,
+        args?: Omit<RequestInit, 'data'>,
       ): Promise<FetchAXResponse<T>> {
         const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
-          [url, args],
+          [url, { ...args, data }],
           defaultOptions,
         );
 
@@ -389,10 +388,11 @@ const fetchAX = {
       },
       async patch<T = any>(
         url: string | URL,
-        args?: RequestInit,
+        data?: BodyInit | Record<string, any>,
+        args?: Omit<RequestInit, 'data'>,
       ): Promise<FetchAXResponse<T>> {
         const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
-          [url, args],
+          [url, { ...args, data }],
           defaultOptions,
         );
 
@@ -445,6 +445,45 @@ const fetchAX = {
       },
     };
     return instance;
+  },
+  async get<T = any>(
+    url: string | URL,
+    args?: RequestInit,
+  ): Promise<FetchAXResponse<T>> {
+    return this.create().get(url, args);
+  },
+  async post<T = any>(
+    url: string | URL,
+    data?: BodyInit | Record<string, any>,
+    args?: Omit<RequestInit, 'data'>,
+  ): Promise<FetchAXResponse<T>> {
+    return this.create().post(url, data, args);
+  },
+  async put<T = any>(
+    url: string | URL,
+    data?: BodyInit | Record<string, any>,
+    args?: Omit<RequestInit, 'data'>,
+  ): Promise<FetchAXResponse<T>> {
+    return this.create().put(url, data, args);
+  },
+  async patch<T = any>(
+    url: string | URL,
+    data?: BodyInit | Record<string, any>,
+    args?: Omit<RequestInit, 'data'>,
+  ): Promise<FetchAXResponse<T>> {
+    return this.create().patch(url, data, args);
+  },
+  async delete<T = any>(
+    url: string | URL,
+    args?: RequestInit,
+  ): Promise<FetchAXResponse<T>> {
+    return this.create().delete(url, args);
+  },
+  async head<T = any>(
+    url: string | URL,
+    args?: RequestInit,
+  ): Promise<FetchAXResponse<T>> {
+    return this.create().head(url, args);
   },
 };
 export default fetchAX;

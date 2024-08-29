@@ -52,7 +52,8 @@ describe('next-fetch', () => {
       {
         headers: new Headers([['Content-Type', 'application/json']]),
         method: 'GET',
-        throwError: false,
+        throwError: true,
+        responseType: 'json',
       },
     );
   });
@@ -74,11 +75,12 @@ describe('next-fetch', () => {
       'https://jsonplaceholder.typicode.com/todos/1',
       {
         headers: new Headers({
-          'Content-Type': 'application/json',
+          'content-Type': 'application/json',
           accept: 'application/json',
         }),
         method: 'GET',
-        throwError: false,
+        throwError: true,
+        responseType: 'json',
       },
     );
   });
@@ -104,7 +106,8 @@ describe('next-fetch', () => {
       {
         headers: new Headers([['Content-Type', 'application/json']]),
         method: 'GET',
-        throwError: false,
+        throwError: true,
+        responseType: 'json',
       },
     );
   });
@@ -144,6 +147,32 @@ describe('next-fetch', () => {
     );
     //then
     expect(typeof data).toEqual(typeof JSON);
+  });
+
+  it('should call request with params', async () => {
+    // given
+    const instance = fetchAX.create();
+
+    // when
+    await instance.get('https://jsonplaceholder.typicode.com/todos/1', {
+      params: {
+        id: 1,
+      },
+    });
+
+    // then
+    expect(fetchMocked).toHaveBeenCalledWith(
+      'https://jsonplaceholder.typicode.com/todos/1?id=1',
+      {
+        headers: new Headers([['content-type', 'application/json']]),
+        method: 'GET',
+        throwError: true,
+        responseType: 'json',
+        params: {
+          id: 1,
+        },
+      },
+    );
   });
 });
 
