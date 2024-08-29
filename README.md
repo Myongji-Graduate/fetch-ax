@@ -136,7 +136,7 @@ You can create a new instance of fetchAX with a default options.
 
 ```tsx
 const instance = fetchAX.create({
-  baseURL: 'httphttps://example.com',
+  baseURL: 'https://example.com',
   headers: {
     Authorization: `Bearer ${YOUR_ACCESS_TOKEN}`,
   },
