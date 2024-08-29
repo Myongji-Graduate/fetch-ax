@@ -1,8 +1,5 @@
 import fetchAX from '../src';
 
-// const instance = fetchAX.create();
-
-// 지정된 ID를 가진 유저에 대한 요청
 fetchAX
   .get('https://example.com/user?ID=12345')
   .then(function (response) {
@@ -55,8 +52,6 @@ fetchAX
     console.log(error);
   });
 
-
-
 function getUserAccount() {
   return fetchAX.get('https://jsonplaceholder.typicode.com/todos/1');
 }
@@ -68,5 +63,4 @@ function getUserPermissions() {
 Promise.all([getUserAccount(), getUserPermissions()]).then(function (results) {
   const acct = results[0];
   const perm = results[1];
-  console.log('병렬', acct, perm);
 });
