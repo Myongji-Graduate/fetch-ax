@@ -2,18 +2,30 @@ export class FetchAxError extends Error {
   constructor(
     readonly statusCode: number,
     readonly response: Response,
+    readonly data?: unknown,
   ) {
-    super();
+    super('fetchAx error');
     this.statusCode = statusCode;
     this.response = response;
   }
+}
+
+function getResponseContentType(response: Response): string {
+  const contentType = response.headers.get('content-type');
+  return contentType ? contentType.split(';')[0] : '';
 }
 
 export const httpErrorHandling = async (
   response: Response,
   requestArgs?: RequestInit,
 ) => {
-  let error = new FetchAxError(response.status, response);
+  const errorData = processReturnResponse(
+    response,
+    getResponseContentType(response) === 'application/json'
+      ? 'json'
+      : undefined,
+  );
+  let error = new FetchAxError(response.status, response, errorData);
 
   if (requestArgs?.responseRejectedInterceptor) {
     error = await requestArgs.responseRejectedInterceptor(error);
