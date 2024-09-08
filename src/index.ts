@@ -1,8 +1,8 @@
-export class FetchAxError extends Error {
+export class FetchAxError<T> extends Error {
   constructor(
     readonly statusCode: number,
     readonly response: Response,
-    readonly data?: unknown,
+    readonly data?: T,
   ) {
     super('fetchAx error');
     this.statusCode = statusCode;
