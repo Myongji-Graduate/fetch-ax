@@ -265,6 +265,13 @@ function isHttpError(response: Response) {
   return response.status >= 300;
 }
 
+function serializateBody(data: BodyInit | Record<string, any>): BodyInit {
+  if (isBodyInit(data)) {
+    return data;
+  }
+  return JSON.stringify(data);
+}
+
 const fetchAX = {
   create: (defaultOptions?: FetchAXDefaultOptions) => {
     const instance = {
