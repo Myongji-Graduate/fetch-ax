@@ -316,7 +316,7 @@ const fetchAX = {
         let response = await fetch(requestUrl, {
           ...requestArgs,
           method: 'POST',
-          body: requestArgs?.data ? (requestArgs.data as BodyInit) : null,
+          body: requestArgs?.data ? serializateBody(requestArgs.data) : null,
         });
 
         if (requestArgs?.throwError && isHttpError(response))
@@ -345,7 +345,7 @@ const fetchAX = {
         let response = await fetch(requestUrl, {
           ...requestArgs,
           method: 'PUT',
-          body: requestArgs?.data ? (requestArgs.data as BodyInit) : null,
+          body: requestArgs?.data ? serializateBody(requestArgs.data) : null,
         });
 
         if (requestArgs?.throwError && isHttpError(response))
@@ -403,7 +403,7 @@ const fetchAX = {
         let response = await fetch(requestUrl, {
           ...requestArgs,
           method: 'PATCH',
-          body: requestArgs?.data ? (requestArgs.data as BodyInit) : null,
+          body: requestArgs?.data ? serializateBody(requestArgs.data) : null,
         });
 
         if (requestArgs?.throwError && isHttpError(response))
