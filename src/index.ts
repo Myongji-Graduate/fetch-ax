@@ -19,7 +19,7 @@ export const httpErrorHandling = async (
   response: Response,
   requestArgs?: RequestInit,
 ) => {
-  const errorData = processReturnResponse(
+  const errorData = await processReturnResponse(
     response,
     getResponseContentType(response) === 'application/json'
       ? 'json'
