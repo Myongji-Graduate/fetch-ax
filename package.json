@@ -28,9 +28,6 @@
   ],
   "author": "gahyuun",
   "license": "ISC",
-  "dependencies": {
-    "typescript": "^5.4.5"
-  },
   "bugs": {
     "url": "https://github.com/Myongji-Graduate/fetch-ax/issues"
   },
@@ -51,6 +48,7 @@
     "lib/**/*"
   ],
   "devDependencies": {
+    "typescript": "^5.4.5",
     "@commitlint/cli": "^17.8.1",
     "@commitlint/config-conventional": "^17.8.1",
     "@types/jest": "^29.5.12",
