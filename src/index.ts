@@ -1,8 +1,7 @@
 export class FetchAxError<T> extends Error {
   constructor(
     readonly statusCode: number,
-    readonly response: Response,
-    readonly data?: T,
+    readonly response: FetchAXResponse<T>,
   ) {
     super('fetchAx error');
     this.statusCode = statusCode;
@@ -19,13 +18,13 @@ export const httpErrorHandling = async (
   response: Response,
   requestArgs?: RequestInit,
 ) => {
-  const errorData = await processReturnResponse(
+  const errorResponse = await processReturnResponse(
     response,
     getResponseContentType(response) === 'application/json'
       ? 'json'
       : undefined,
   );
-  let error = new FetchAxError(response.status, response, errorData);
+  let error = new FetchAxError(response.status, errorResponse);
 
   if (requestArgs?.responseRejectedInterceptor) {
     error = await requestArgs.responseRejectedInterceptor(error);
@@ -102,7 +101,7 @@ export type FetchAXDefaultOptions = {
 const processReturnResponse = async <T = any>(
   response: Response,
   responseType?: ResponseType,
-) => {
+): Promise<FetchAXResponse<T>> => {
   let data: T;
   switch (responseType) {
     case 'arraybuffer':
