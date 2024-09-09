@@ -276,10 +276,14 @@ function isHttpError(response: Response) {
   return response.status >= 300;
 }
 
-function serializateBody(data: BodyInit | Record<string, any>): BodyInit {
+function ensureBodyInit(data: BodyInit | Record<string, any>): BodyInit {
   if (isBodyInit(data)) {
     return data;
   }
+  return serializateBody(data);
+}
+
+function serializateBody(data: Record<string, any>): BodyInit {
   return JSON.stringify(data);
 }
 
@@ -327,7 +331,7 @@ const fetchAX = {
         let response = await fetch(requestUrl, {
           ...requestArgs,
           method: 'POST',
-          body: requestArgs?.data ? serializateBody(requestArgs.data) : null,
+          body: requestArgs?.data ? ensureBodyInit(requestArgs.data) : null,
         });
 
         if (requestArgs?.throwError && isHttpError(response))
@@ -356,7 +360,7 @@ const fetchAX = {
         let response = await fetch(requestUrl, {
           ...requestArgs,
           method: 'PUT',
-          body: requestArgs?.data ? serializateBody(requestArgs.data) : null,
+          body: requestArgs?.data ? ensureBodyInit(requestArgs.data) : null,
         });
 
         if (requestArgs?.throwError && isHttpError(response))
@@ -414,7 +418,7 @@ const fetchAX = {
         let response = await fetch(requestUrl, {
           ...requestArgs,
           method: 'PATCH',
-          body: requestArgs?.data ? serializateBody(requestArgs.data) : null,
+          body: requestArgs?.data ? ensureBodyInit(requestArgs.data) : null,
         });
 
         if (requestArgs?.throwError && isHttpError(response))
