@@ -280,10 +280,10 @@ function ensureBodyInit(data: BodyInit | Record<string, any>): BodyInit {
   if (isBodyInit(data)) {
     return data;
   }
-  return serializateBody(data);
+  return serializeBody(data);
 }
 
-function serializateBody(data: Record<string, any>): BodyInit {
+function serializeBody(data: Record<string, any>): BodyInit {
   return JSON.stringify(data);
 }
 
