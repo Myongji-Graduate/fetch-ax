@@ -1,6 +1,6 @@
 {
   "name": "fetch-ax",
-  "version": "1.0.4",
+  "version": "1.0.10",
   "description": "A modern HTTP client that extends the Fetch API, providing Axios-like syntax and full compatibility with Next.js App Router.",
   "types": "./lib/cjs/types/index.d.ts",
   "main": "./lib/cjs/index.js",
@@ -27,9 +27,6 @@
   ],
   "author": "gahyuun",
   "license": "ISC",
-  "dependencies": {
-    "typescript": "^5.4.5"
-  },
   "bugs": {
     "url": "https://github.com/Myongji-Graduate/fetch-ax/issues"
   },
@@ -50,6 +47,7 @@
     "lib/**/*"
   ],
   "devDependencies": {
+    "typescript": "^5.4.5",
     "@commitlint/cli": "^17.8.1",
     "@commitlint/config-conventional": "^17.8.1",
     "@types/jest": "^29.5.12",
