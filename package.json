@@ -4,7 +4,6 @@
   "description": "A modern HTTP client that extends the Fetch API, providing Axios-like syntax and full compatibility with Next.js App Router.",
   "types": "./lib/cjs/types/index.d.ts",
   "main": "./lib/cjs/index.js",
-  "type": "module",
   "scripts": {
     "test": "jest",
     "clean": "rm -rf ./lib",
