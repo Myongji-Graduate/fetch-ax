@@ -2,17 +2,14 @@
   "name": "fetch-ax",
   "version": "1.0.4",
   "description": "A modern HTTP client that extends the Fetch API, providing Axios-like syntax and full compatibility with Next.js App Router.",
-  "types": "./lib/cjs/types/index.d.ts",
-  "main": "./lib/cjs/index.js",
   "scripts": {
     "test": "jest",
     "clean": "rm -rf ./lib",
-    "build": "npm run clean && npm run build:esm && npm run build:cjs",
-    "build:esm": "tsc -p ./tsconfig.esm.json && mv lib/esm/index.js lib/esm/index.mjs",
-    "build:cjs": "tsc -p ./tsconfig.cjs.json",
+    "build": "rm -rf dist && rollup -c",
     "prepack": "npm run build",
     "prepare": "husky install"
   },
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Myongji-Graduate/fetch-ax.git"
@@ -38,20 +35,22 @@
     ".": {
       "import": {
         "types": "./lib/esm/types/index.d.ts",
-        "default": "./lib/esm/index.mjs"
+        "default": "./lib/esm/index.js"
       },
       "require": {
-        "types": "./lib/cjs/types/index.d.ts",
-        "default": "./lib/cjs/index.js"
+        "types": "./lib/cjs/types/index.d.cts",
+        "default": "./lib/cjs/index.cjs"
       }
     }
   },
   "files": [
-    "lib/**/*"
+    "dist"
   ],
   "devDependencies": {
     "@commitlint/cli": "^17.8.1",
     "@commitlint/config-conventional": "^17.8.1",
+    "@rollup/plugin-commonjs": "^26.0.1",
+    "@rollup/plugin-typescript": "^11.1.6",
     "@types/jest": "^29.5.12",
     "cross-fetch": "^4.0.0",
     "eslint": "^9.3.0",
@@ -60,7 +59,9 @@
     "jest-environment-jsdom": "^29.7.0",
     "lint-staged": "^15.2.5",
     "prettier": "^3.2.5",
-    "ts-jest": "^29.1.4"
+    "rollup": "^4.21.3",
+    "ts-jest": "^29.1.4",
+    "tslib": "^2.7.0"
   },
   "lint-staged": {
     "src/**/*.{js,ts}": [
