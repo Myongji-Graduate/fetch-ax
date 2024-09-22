@@ -1,22 +1,30 @@
-import { chainInterceptor, mergeOptions } from './utils';
-import { presetOptions } from './preset-options';
-
-export class FetchAxError extends Error {
+export class FetchAxError<T> extends Error {
   constructor(
     readonly statusCode: number,
-    readonly response: Response,
+    readonly response: FetchAXResponse<T>,
   ) {
-    super();
+    super('fetchAx error');
     this.statusCode = statusCode;
     this.response = response;
   }
+}
+
+function getResponseContentType(response: Response): string {
+  const contentType = response.headers.get('content-type');
+  return contentType ? contentType.split(';')[0] : '';
 }
 
 export const httpErrorHandling = async (
   response: Response,
   requestArgs?: RequestInit,
 ) => {
-  let error = new FetchAxError(response.status, response);
+  const errorResponse = await processReturnResponse(
+    response,
+    getResponseContentType(response) === 'application/json'
+      ? 'json'
+      : undefined,
+  );
+  let error = new FetchAxError(response.status, errorResponse);
 
   if (requestArgs?.responseRejectedInterceptor) {
     error = await requestArgs.responseRejectedInterceptor(error);
@@ -93,7 +101,7 @@ export type FetchAXDefaultOptions = {
 const processReturnResponse = async <T = any>(
   response: Response,
   responseType?: ResponseType,
-) => {
+): Promise<FetchAXResponse<T>> => {
   let data: T;
   switch (responseType) {
     case 'arraybuffer':
@@ -268,6 +276,17 @@ function isHttpError(response: Response) {
   return response.status >= 300;
 }
 
+function ensureBodyInit(data: BodyInit | Record<string, any>): BodyInit {
+  if (isBodyInit(data)) {
+    return data;
+  }
+  return serializeBody(data);
+}
+
+function serializeBody(data: Record<string, any>): BodyInit {
+  return JSON.stringify(data);
+}
+
 const fetchAX = {
   create: (defaultOptions?: FetchAXDefaultOptions) => {
     const instance = {
@@ -312,7 +331,7 @@ const fetchAX = {
         let response = await fetch(requestUrl, {
           ...requestArgs,
           method: 'POST',
-          body: requestArgs?.data ? (requestArgs.data as BodyInit) : null,
+          body: requestArgs?.data ? ensureBodyInit(requestArgs.data) : null,
         });
 
         if (requestArgs?.throwError && isHttpError(response))
@@ -341,7 +360,7 @@ const fetchAX = {
         let response = await fetch(requestUrl, {
           ...requestArgs,
           method: 'PUT',
-          body: requestArgs?.data ? (requestArgs.data as BodyInit) : null,
+          body: requestArgs?.data ? ensureBodyInit(requestArgs.data) : null,
         });
 
         if (requestArgs?.throwError && isHttpError(response))
@@ -399,7 +418,7 @@ const fetchAX = {
         let response = await fetch(requestUrl, {
           ...requestArgs,
           method: 'PATCH',
-          body: requestArgs?.data ? (requestArgs.data as BodyInit) : null,
+          body: requestArgs?.data ? ensureBodyInit(requestArgs.data) : null,
         });
 
         if (requestArgs?.throwError && isHttpError(response))
@@ -487,3 +506,46 @@ const fetchAX = {
   },
 };
 export default fetchAX;
+export const presetOptions: FetchAXDefaultOptions = {
+  headers: new Headers([['Content-Type', 'application/json']]),
+
+  throwError: true,
+
+  responseType: 'json',
+};
+export function mergeOptions(
+  ...args: Record<string, any>[]
+): FetchAXDefaultOptions {
+  const result: Record<string, any> = { ...args[0] };
+
+  for (let i = 1; i < args.length; i++) {
+    const props = args[i];
+
+    for (const key in props) {
+      const a = result[key];
+      const b = props[key];
+
+      if (typeof a === 'function' && typeof b === 'function') {
+        result[key] = chainInterceptor(a, b);
+      } else {
+        result[key] = b !== undefined ? b : a;
+      }
+    }
+  }
+  return result;
+}
+
+export function chainInterceptor<T>(
+  ...interceptors: (((arg: T) => Promise<T> | T) | undefined)[]
+): ((arg: T) => Promise<T>) | undefined {
+  if (interceptors.filter((interceptor) => interceptor).length === 0) return;
+  return async (arg: T) => {
+    let result = arg;
+    for (let interceptor of interceptors) {
+      if (interceptor && typeof interceptor === 'function') {
+        result = await interceptor(result);
+      }
+    }
+    return result;
+  };
+}
