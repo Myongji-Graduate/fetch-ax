@@ -1,6 +1,6 @@
 {
   "name": "fetch-ax",
-  "version": "1.0.4",
+  "version": "2.0.0",
   "description": "A modern HTTP client that extends the Fetch API, providing Axios-like syntax and full compatibility with Next.js App Router.",
   "scripts": {
     "test": "jest",
