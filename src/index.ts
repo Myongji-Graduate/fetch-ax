@@ -145,7 +145,7 @@ const processReturnResponse = async <T = any>(
  */
 export type FetchArgs = [string | URL, RequestInit | undefined];
 
-export interface RequestInit extends globalThis.RequestInit {
+export interface RequestInit extends Omit<globalThis.RequestInit, 'body'> {
   /** fetch-ax does not have a method attribute because it has http request method. */
 
   /** A BodyInit object or null to set request's body. */
@@ -511,6 +511,8 @@ export const presetOptions: FetchAXDefaultOptions = {
   throwError: true,
 
   responseType: 'json',
+
+  // baseURL: ''
 };
 export function mergeOptions(
   ...args: Record<string, any>[]
