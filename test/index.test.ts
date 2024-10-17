@@ -331,6 +331,7 @@ describe('interceptor', () => {
       // given
       const instance = fetchAX.create({
         throwError: true,
+
         responseRejectedInterceptor: (error) => {
           if (error.statusCode === 300) {
             return { error: 'error' };
@@ -399,7 +400,9 @@ describe('interceptor', () => {
       } catch (error) {
         // then
         expect(error).toBeInstanceOf(BadRequestError);
-        expect(error.message).toBe('Bad Request');
+        if (error instanceof BadRequestError) {
+          expect(error.message).toBe('Bad Request');
+        }
       }
     });
 
@@ -423,7 +426,9 @@ describe('interceptor', () => {
       } catch (error) {
         // then
         expect(error).toBeInstanceOf(BadRequestError);
-        expect(error.message).toBe('Bad Request');
+        if (error instanceof BadRequestError) {
+          expect(error.message).toBe('Bad Request');
+        }
       }
     });
   });
