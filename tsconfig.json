@@ -7,7 +7,7 @@
     "outDir": "dist",
     "strict": true,
     "declaration": true,
-    "types": ["node"]
+    "types": ["node", "@types/jest"]
   },
   "include": ["src"]
 }
