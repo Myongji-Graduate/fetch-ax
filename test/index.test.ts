@@ -186,6 +186,14 @@ describe('next-fetch-error', () => {
       json: jest.fn().mockResolvedValue({
         error: 'Multiple choices available',
       }),
+      headers: {
+        get: (header: string) => {
+          if (header === 'Content-Type') {
+            return 'application/json';
+          }
+          return null;
+        },
+      },
     });
 
     // @ts-ignore
@@ -269,6 +277,14 @@ describe('interceptor', () => {
     beforeEach(() => {
       fetchMocked = jest.fn().mockResolvedValue({
         status: 300,
+        headers: {
+          get: (header: string) => {
+            if (header === 'Content-Type') {
+              return 'application/json';
+            }
+            return null;
+          },
+        },
         json: jest.fn().mockResolvedValue({
           error: 'Multiple choices available',
         }),
