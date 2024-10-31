@@ -186,6 +186,14 @@ describe('next-fetch-error', () => {
       json: jest.fn().mockResolvedValue({
         error: 'Multiple choices available',
       }),
+      headers: {
+        get: (header: string) => {
+          if (header === 'Content-Type') {
+            return 'application/json';
+          }
+          return null;
+        },
+      },
     });
 
     // @ts-ignore
@@ -269,6 +277,14 @@ describe('interceptor', () => {
     beforeEach(() => {
       fetchMocked = jest.fn().mockResolvedValue({
         status: 300,
+        headers: {
+          get: (header: string) => {
+            if (header === 'Content-Type') {
+              return 'application/json';
+            }
+            return null;
+          },
+        },
         json: jest.fn().mockResolvedValue({
           error: 'Multiple choices available',
         }),
@@ -331,6 +347,7 @@ describe('interceptor', () => {
       // given
       const instance = fetchAX.create({
         throwError: true,
+
         responseRejectedInterceptor: (error) => {
           if (error.statusCode === 300) {
             return { error: 'error' };
@@ -399,7 +416,9 @@ describe('interceptor', () => {
       } catch (error) {
         // then
         expect(error).toBeInstanceOf(BadRequestError);
-        expect(error.message).toBe('Bad Request');
+        if (error instanceof BadRequestError) {
+          expect(error.message).toBe('Bad Request');
+        }
       }
     });
 
@@ -423,7 +442,9 @@ describe('interceptor', () => {
       } catch (error) {
         // then
         expect(error).toBeInstanceOf(BadRequestError);
-        expect(error.message).toBe('Bad Request');
+        if (error instanceof BadRequestError) {
+          expect(error.message).toBe('Bad Request');
+        }
       }
     });
   });
