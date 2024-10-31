@@ -254,9 +254,20 @@ const applyDefaultOptionsArgs = (
 
   if (defaultOptions?.requestInterceptor) {
     requestArgs = defaultOptions.requestInterceptor(requestArgs);
+    const headers = new Headers(requestArgs.headers);
+    headers.forEach((value, key) => {
+      requestHeaders.set(key, value);
+    });
+    requestArgs.headers = requestHeaders;
   }
   if (requestInit?.requestInterceptor) {
     requestArgs = requestInit.requestInterceptor(requestArgs);
+
+    const headers = new Headers(requestArgs.headers);
+    headers.forEach((value, key) => {
+      requestHeaders.set(key, value);
+    });
+    requestArgs.headers = requestHeaders;
   }
 
   requestArgs.responseInterceptor = chainInterceptor(
@@ -267,7 +278,7 @@ const applyDefaultOptionsArgs = (
     defaultOptions?.responseRejectedInterceptor,
     requestInit?.responseRejectedInterceptor,
   );
-
+  console.log(requestArgs.headers);
   return [requestUrl.toString(), requestArgs];
 };
 
