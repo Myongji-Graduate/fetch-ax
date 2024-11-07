@@ -54,7 +54,7 @@ export type FetchAXDefaultOptions = {
    *
    * @public
    */
-  baseURL?: string | URL;
+  baseURL?: string;
   /**
    * Defatul Headers of fetch. It will be used when the headers attribute does not exist in the optional object
    *
@@ -143,7 +143,7 @@ const processReturnResponse = async <T = any>(
  *
  * @public
  */
-export type FetchArgs = [string | URL, RequestInit | undefined];
+export type FetchArgs = [string, RequestInit | undefined];
 
 export interface RequestInit extends Omit<globalThis.RequestInit, 'body'> {
   /** fetch-ax does not have a method attribute because it has http request method. */
@@ -211,20 +211,55 @@ const isBodyInit = (data: any): data is BodyInit => {
   );
 };
 
+const combineURLs = (baseURL: string, relativeURL: string) =>
+  relativeURL
+    ? baseURL.replace(/\/?\/$/, '') + '/' + relativeURL.replace(/^\/+/, '')
+    : baseURL;
+
+const isAbsoluteURL = (url: string) => {
+  // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
+  // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
+  // by any combination of letters, digits, plus, period, or hyphen.
+  return /^([a-z][a-z\d+\-.]*:)?\/\//i.test(url);
+};
+
+const buildFullPath = (baseURL: string | undefined, requestedURL: string) => {
+  if (baseURL && !isAbsoluteURL(requestedURL)) {
+    return combineURLs(baseURL, requestedURL);
+  }
+  return requestedURL;
+};
+
+const appendParamsToURL = (
+  url: string,
+  params: Record<string, string> | undefined,
+) => {
+  if (!params || typeof params !== 'object') {
+    return url;
+  }
+  const [baseUrl, hash] = url.split('#');
+  const separator = baseUrl.includes('?') ? '&' : '?';
+  const queryString = Object.entries(params)
+    .map(
+      ([key, value]) =>
+        `${encodeURIComponent(key)}=${encodeURIComponent(value)}`,
+    )
+    .join('&');
+
+  return `${baseUrl}${separator}${queryString}${hash ? `#${hash}` : ''}`;
+};
+
 const applyDefaultOptionsArgs = (
   [url, requestInit]: FetchArgs,
   defaultOptions?: FetchAXDefaultOptions,
 ): FetchArgs => {
   defaultOptions = mergeOptions(presetOptions, defaultOptions ?? {});
 
-  const requestUrl: URL = defaultOptions?.baseURL
-    ? new URL(url, defaultOptions.baseURL)
-    : new URL(url);
-
-  const searchParams = new URLSearchParams(requestInit?.params);
-  for (const [key, value] of searchParams) {
-    requestUrl.searchParams.append(key, value);
-  }
+  const requestUrl = appendParamsToURL(
+    // `baseURL` will be prepended to `url` unless `url` is absolute.
+    buildFullPath(defaultOptions?.baseURL, url),
+    requestInit?.params,
+  );
 
   const requestHeaders = new Headers();
   if (defaultOptions?.headers) {
@@ -290,7 +325,7 @@ const fetchAX = {
   create: (defaultOptions?: FetchAXDefaultOptions) => {
     const instance = {
       async get<T = any>(
-        url: string | URL,
+        url: string,
         args?: RequestInit,
       ): Promise<FetchAXResponse<T>> {
         const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
@@ -318,7 +353,7 @@ const fetchAX = {
         return returnResponse;
       },
       async post<T = any>(
-        url: string | URL,
+        url: string,
         data?: BodyInit | Record<string, any>,
         args?: Omit<RequestInit, 'data'>,
       ): Promise<FetchAXResponse<T>> {
@@ -347,7 +382,7 @@ const fetchAX = {
         return returnResponse;
       },
       async put<T = any>(
-        url: string | URL,
+        url: string,
         data?: BodyInit | Record<string, any>,
         args?: Omit<RequestInit, 'data'>,
       ): Promise<FetchAXResponse<T>> {
@@ -377,7 +412,7 @@ const fetchAX = {
         return returnResponse;
       },
       async delete<T = any>(
-        url: string | URL,
+        url: string,
         args?: RequestInit,
       ): Promise<FetchAXResponse<T>> {
         const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
@@ -405,7 +440,7 @@ const fetchAX = {
         return returnResponse;
       },
       async patch<T = any>(
-        url: string | URL,
+        url: string,
         data?: BodyInit | Record<string, any>,
         args?: Omit<RequestInit, 'data'>,
       ): Promise<FetchAXResponse<T>> {
@@ -435,7 +470,7 @@ const fetchAX = {
         return returnResponse;
       },
       async head<T = any>(
-        url: string | URL,
+        url: string,
         args?: RequestInit,
       ): Promise<FetchAXResponse<T>> {
         const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
@@ -465,40 +500,40 @@ const fetchAX = {
     return instance;
   },
   async get<T = any>(
-    url: string | URL,
+    url: string,
     args?: RequestInit,
   ): Promise<FetchAXResponse<T>> {
     return this.create().get(url, args);
   },
   async post<T = any>(
-    url: string | URL,
+    url: string,
     data?: BodyInit | Record<string, any>,
     args?: Omit<RequestInit, 'data'>,
   ): Promise<FetchAXResponse<T>> {
     return this.create().post(url, data, args);
   },
   async put<T = any>(
-    url: string | URL,
+    url: string,
     data?: BodyInit | Record<string, any>,
     args?: Omit<RequestInit, 'data'>,
   ): Promise<FetchAXResponse<T>> {
     return this.create().put(url, data, args);
   },
   async patch<T = any>(
-    url: string | URL,
+    url: string,
     data?: BodyInit | Record<string, any>,
     args?: Omit<RequestInit, 'data'>,
   ): Promise<FetchAXResponse<T>> {
     return this.create().patch(url, data, args);
   },
   async delete<T = any>(
-    url: string | URL,
+    url: string,
     args?: RequestInit,
   ): Promise<FetchAXResponse<T>> {
     return this.create().delete(url, args);
   },
   async head<T = any>(
-    url: string | URL,
+    url: string,
     args?: RequestInit,
   ): Promise<FetchAXResponse<T>> {
     return this.create().head(url, args);
