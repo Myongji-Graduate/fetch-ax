@@ -9,6 +9,9 @@ export class FetchAxError<T> extends Error {
   }
 }
 
+type RequestInitReturnedByInterceptor = Omit<RequestInit, 'headers'> & {
+  headers: Record<string, string>;
+};
 function getResponseContentType(response: Response): string {
   const contentType = response.headers.get('content-type');
   return contentType ? contentType.split(';')[0] : '';
@@ -95,7 +98,9 @@ export type FetchAXDefaultOptions = {
    *
    * @public
    */
-  requestInterceptor?: (requestArg: RequestInit) => RequestInit;
+  requestInterceptor?: (
+    requestArg: RequestInitReturnedByInterceptor,
+  ) => RequestInitReturnedByInterceptor;
 };
 
 const processReturnResponse = async <T = any>(
@@ -180,7 +185,9 @@ export interface RequestInit extends Omit<globalThis.RequestInit, 'body'> {
   /** Response Interceptor of fetch. It will be called after response When the status is 300 or more */
   responseRejectedInterceptor?: (error: any) => any;
   /** Request Interceptor of fetch. It will be called before request */
-  requestInterceptor?: (requestArg: RequestInit) => RequestInit;
+  requestInterceptor?: (
+    requestArg: RequestInitReturnedByInterceptor,
+  ) => RequestInitReturnedByInterceptor;
   /** Throw Error of fetch. If the throwError attribute is true, throw an error when the status is 300 or more */
   throwError?: boolean;
   /** data's type */
@@ -261,25 +268,23 @@ const applyDefaultOptionsArgs = (
     requestInit?.params,
   );
 
-  const requestHeaders = new Headers();
+  const requestHeaders: Record<string, string> = {};
   if (defaultOptions?.headers) {
     new Headers(defaultOptions.headers).forEach((value, key) => {
-      requestHeaders.set(key, value);
+      requestHeaders[key] = value;
     });
   }
   if (requestInit?.headers) {
     new Headers(requestInit.headers).forEach((value, key) => {
-      requestHeaders.set(key, value);
+      requestHeaders[key] = value;
     });
   }
 
-  let requestArgs = requestHeaders
-    ? {
-        ...defaultOptions,
-        ...requestInit,
-        headers: requestHeaders,
-      }
-    : { ...defaultOptions, ...requestInit };
+  let requestArgs = {
+    ...defaultOptions,
+    ...requestInit,
+    headers: requestHeaders,
+  };
 
   if (!requestArgs.throwError) {
     requestArgs.throwError = defaultOptions?.throwError
@@ -541,7 +546,7 @@ const fetchAX = {
 };
 export default fetchAX;
 export const presetOptions: FetchAXDefaultOptions = {
-  headers: new Headers([['Content-Type', 'application/json']]),
+  headers: { 'Content-Type': 'application/json' },
 
   throwError: true,
 
