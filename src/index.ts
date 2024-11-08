@@ -207,7 +207,15 @@ const isArrayBufferView = (data: any): data is ArrayBufferView => {
 };
 
 const isBodyInit = (data: any): data is BodyInit => {
+  const isJson = (data: any) => {
+    try {
+      return typeof JSON.parse(data) === 'object';
+    } catch (e) {
+      return false;
+    }
+  };
   return (
+    isJson(data) || // data === 'string' 을 통해서도 JSON인지를 확인할 수 있지만 명시적으로 따지기 위해서
     typeof data === 'string' ||
     data instanceof ReadableStream ||
     data instanceof Blob ||
