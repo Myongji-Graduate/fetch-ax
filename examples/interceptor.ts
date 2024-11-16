@@ -1,11 +1,12 @@
-import fetchAX, { RequestInit } from '../src';
+import fetchAX, { RequestInit, RequestInitReturnedByInterceptor } from '../src';
 
 const instance = fetchAX.create({
   responseInterceptor: (response: any) => {
     console.log('default options response interceptor');
     return response;
   },
-  requestInterceptor: (requestArg: RequestInit) => {
+  requestInterceptor: (requestArg: RequestInitReturnedByInterceptor) => {
+    requestArg.headers = {};
     console.log('default options reqeust interceptor');
     return requestArg;
   },
@@ -19,7 +20,8 @@ default options response interceptor
 requestInit response interceptor
  */
 const response = instance.get('/', {
-  requestInterceptor: (requestArg: RequestInit) => {
+  requestInterceptor: (requestArg: RequestInitReturnedByInterceptor) => {
+    requestArg.headers = { ...requestArg.headers };
     console.log('requestInit reqeust interceptor');
     return requestArg;
   },
@@ -29,4 +31,4 @@ const response = instance.get('/', {
   },
 });
 
-console.log(response)
+console.log(response);

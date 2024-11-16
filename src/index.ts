@@ -9,7 +9,7 @@ export class FetchAxError<T> extends Error {
   }
 }
 
-type RequestInitReturnedByInterceptor = Omit<RequestInit, 'headers'> & {
+export type RequestInitReturnedByInterceptor = Omit<RequestInit, 'headers'> & {
   headers: Record<string, string>;
 };
 function getResponseContentType(response: Response): string {
