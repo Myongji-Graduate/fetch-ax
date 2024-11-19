@@ -14,6 +14,16 @@ function getResponseContentType(response: Response): string {
   return contentType ? contentType.split(';')[0] : '';
 }
 
+const resolveResponseType = (
+  response: Response,
+  responseType?: ResponseType,
+) => {
+  if (responseType) return responseType;
+  return getResponseContentType(response) === 'application/json'
+    ? 'json'
+    : undefined;
+};
+
 export const httpErrorHandling = async (
   response: Response,
   requestArgs?: RequestInit,
@@ -97,43 +107,51 @@ export type FetchAXDefaultOptions = {
    */
   requestInterceptor?: (requestArg: RequestInit) => RequestInit;
 };
+const parseResponseData = async <T>(
+  response: Response,
+  type: ResponseType,
+): Promise<T> => {
+  switch (type) {
+    case 'arraybuffer':
+      return (await response.arrayBuffer()) as T;
+    case 'json':
+      return await response.json();
+    case 'text':
+      return (await response.text()) as T;
+    case 'formdata':
+      return (await response.formData()) as T;
+    case 'blob':
+      return (await response.blob()) as T;
+    default:
+      return response.body as T;
+  }
+};
+
+const buildFetchAXResponse = <T>(
+  response: Response,
+  data: T,
+): FetchAXResponse<T> => ({
+  data,
+  status: response.status,
+  statusText: response.statusText,
+  headers: response.headers,
+});
 
 const processReturnResponse = async <T = any>(
   response: Response,
   responseType?: ResponseType,
 ): Promise<FetchAXResponse<T>> => {
-  let data: T;
-  switch (responseType) {
-    case 'arraybuffer':
-      data = (await response.arrayBuffer()) as T;
-      break;
+  const resolvedResponseType = resolveResponseType(response, responseType);
+  if (!resolvedResponseType)
+    return buildFetchAXResponse<T>(response, response.body as T);
 
-    case 'json':
-      data = await response.json();
-      break;
-
-    case 'text':
-      data = (await response.text()) as T;
-      break;
-
-    case 'formdata':
-      data = (await response.formData()) as T;
-      break;
-
-    case 'blob':
-      data = (await response.blob()) as T;
-      break;
-
-    default:
-      data = response.body as T;
-      break;
+  try {
+    const data = await parseResponseData<T>(response, resolvedResponseType);
+    return buildFetchAXResponse(response, data);
+  } catch (error) {
+    console.error('Return of original object due to parse error:', error);
+    return buildFetchAXResponse<T>(response, response.body as T);
   }
-  return {
-    data,
-    status: response.status,
-    statusText: response.statusText,
-    headers: response.headers,
-  };
 };
 
 /**
