@@ -28,12 +28,7 @@ export const httpErrorHandling = async (
   response: Response,
   requestArgs?: RequestInit,
 ) => {
-  const errorResponse = await processReturnResponse(
-    response,
-    getResponseContentType(response) === 'application/json'
-      ? 'json'
-      : undefined,
-  );
+  const errorResponse = await processReturnResponse(response);
   let error = new FetchAxError(response.status, errorResponse);
 
   if (requestArgs?.responseRejectedInterceptor) {
