@@ -6,14 +6,17 @@ describe('next-fetch', () => {
   let mockRequestInterceptor: jest.Mock;
   let mockResponseInterceptor: jest.Mock;
 
+  const mockResponseData = {
+    userId: 1,
+    id: 1,
+    title: 'delectus aut autem',
+    completed: false,
+  };
+
   beforeEach(() => {
     fetchMocked = jest.fn().mockResolvedValue({
-      json: jest.fn().mockResolvedValue({
-        userId: 1,
-        id: 1,
-        title: 'delectus aut autem',
-        completed: false,
-      }),
+      body: JSON.stringify(mockResponseData),
+      json: jest.fn().mockResolvedValue(mockResponseData),
     });
 
     // @ts-ignore
@@ -147,6 +150,24 @@ describe('next-fetch', () => {
     );
     //then
     expect(typeof data).toEqual(typeof JSON);
+  });
+
+  it('should returns the raw response body due to parsing error', async () => {
+    // given
+    const instance = fetchAX.create({ responseType: 'formdata' });
+    let error;
+    let response;
+    //when
+    try {
+      response = await instance.get(
+        'https://jsonplaceholder.typicode.com/todos/1',
+      );
+    } catch (e) {
+      error = e;
+    }
+    //then
+    expect(error).toEqual(undefined);
+    expect(typeof response?.data).toEqual('string');
   });
 
   it('should call request with params', async () => {
