@@ -31,12 +31,12 @@
   "exports": {
     ".": {
       "import": {
-        "types": "./lib/esm/types/index.d.ts",
-        "default": "./lib/esm/index.js"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       },
       "require": {
-        "types": "./lib/cjs/types/index.d.cts",
-        "default": "./lib/cjs/index.cjs"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.cjs"
       }
     }
   },
