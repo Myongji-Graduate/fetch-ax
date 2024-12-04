@@ -60,7 +60,9 @@ describe('next-fetch', () => {
       'https://jsonplaceholder.typicode.com/todos/1',
       //default
       {
-        headers: new Headers([['Content-Type', 'application/json']]),
+        headers: {
+          'content-type': 'application/json',
+        }, // options들은 headers 객체로 한 번 생성되기 때문에 소문자로 변경됨
         method: 'GET',
         throwError: true,
       },
@@ -83,10 +85,10 @@ describe('next-fetch', () => {
     expect(fetchMocked).toHaveBeenCalledWith(
       'https://jsonplaceholder.typicode.com/todos/1',
       {
-        headers: new Headers({
-          'content-Type': 'application/json',
+        headers: {
+          'content-type': 'application/json',
           accept: 'application/json',
-        }),
+        },
         method: 'GET',
         throwError: true,
       },
@@ -112,7 +114,7 @@ describe('next-fetch', () => {
     expect(fetchMocked).toHaveBeenCalledWith(
       'https://jsonplaceholder.typicode.com/todos/1',
       {
-        headers: new Headers([['Content-Type', 'application/json']]),
+        headers: { 'content-type': 'application/json' },
         method: 'GET',
         throwError: true,
       },
@@ -189,7 +191,7 @@ describe('next-fetch', () => {
     expect(fetchMocked).toHaveBeenCalledWith(
       'https://jsonplaceholder.typicode.com/todos/1?id=1',
       {
-        headers: new Headers([['content-type', 'application/json']]),
+        headers: { 'content-type': 'application/json' },
         method: 'GET',
         throwError: true,
         params: {

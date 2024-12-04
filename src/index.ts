@@ -9,6 +9,9 @@ export class FetchAxError<T> extends Error {
   }
 }
 
+export type RequestInitReturnedByInterceptor = Omit<RequestInit, 'headers'> & {
+  headers: Record<string, string>;
+};
 function getResponseContentType(response: Response): string {
   const contentType = response.headers.get('content-type');
   return contentType ? contentType.split(';')[0] : '';
@@ -59,7 +62,7 @@ export type FetchAXDefaultOptions = {
    *
    * @public
    */
-  baseURL?: string | URL;
+  baseURL?: string;
   /**
    * Defatul Headers of fetch. It will be used when the headers attribute does not exist in the optional object
    *
@@ -100,7 +103,9 @@ export type FetchAXDefaultOptions = {
    *
    * @public
    */
-  requestInterceptor?: (requestArg: RequestInit) => RequestInit;
+  requestInterceptor?: (
+    requestArg: RequestInitReturnedByInterceptor,
+  ) => RequestInitReturnedByInterceptor;
 };
 const parseResponseData = async <T>(
   response: Response,
@@ -154,7 +159,7 @@ const processReturnResponse = async <T = any>(
  *
  * @public
  */
-export type FetchArgs = [string | URL, RequestInit | undefined];
+export type FetchArgs = [string, RequestInit | undefined];
 
 export interface RequestInit extends Omit<globalThis.RequestInit, 'body'> {
   /** fetch-ax does not have a method attribute because it has http request method. */
@@ -191,7 +196,9 @@ export interface RequestInit extends Omit<globalThis.RequestInit, 'body'> {
   /** Response Interceptor of fetch. It will be called after response When the status is 300 or more */
   responseRejectedInterceptor?: (error: any) => any;
   /** Request Interceptor of fetch. It will be called before request */
-  requestInterceptor?: (requestArg: RequestInit) => RequestInit;
+  requestInterceptor?: (
+    requestArg: RequestInitReturnedByInterceptor,
+  ) => RequestInitReturnedByInterceptor;
   /** Throw Error of fetch. If the throwError attribute is true, throw an error when the status is 300 or more */
   throwError?: boolean;
   /** Resposne data's type */
@@ -211,7 +218,15 @@ const isArrayBufferView = (data: any): data is ArrayBufferView => {
 };
 
 const isBodyInit = (data: any): data is BodyInit => {
+  const isJson = (data: any) => {
+    try {
+      return typeof JSON.parse(data) === 'object';
+    } catch (e) {
+      return false;
+    }
+  };
   return (
+    isJson(data) || // data === 'string' 을 통해서도 JSON인지를 확인할 수 있지만 명시적으로 따지기 위해서
     typeof data === 'string' ||
     data instanceof ReadableStream ||
     data instanceof Blob ||
@@ -222,40 +237,73 @@ const isBodyInit = (data: any): data is BodyInit => {
   );
 };
 
+const combineURLs = (baseURL: string, relativeURL: string) =>
+  relativeURL
+    ? baseURL.replace(/\/?\/$/, '') + '/' + relativeURL.replace(/^\/+/, '')
+    : baseURL;
+
+const isAbsoluteURL = (url: string) => {
+  // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
+  // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
+  // by any combination of letters, digits, plus, period, or hyphen.
+  return /^([a-z][a-z\d+\-.]*:)?\/\//i.test(url);
+};
+
+const buildFullPath = (baseURL: string | undefined, requestedURL: string) => {
+  if (baseURL && !isAbsoluteURL(requestedURL)) {
+    return combineURLs(baseURL, requestedURL);
+  }
+  return requestedURL;
+};
+
+const appendParamsToURL = (
+  url: string,
+  params: Record<string, string> | undefined,
+) => {
+  if (!params || typeof params !== 'object') {
+    return url;
+  }
+  const [baseUrl, hash] = url.split('#');
+  const separator = baseUrl.includes('?') ? '&' : '?';
+  const queryString = Object.entries(params)
+    .map(
+      ([key, value]) =>
+        `${encodeURIComponent(key)}=${encodeURIComponent(value)}`,
+    )
+    .join('&');
+
+  return `${baseUrl}${separator}${queryString}${hash ? `#${hash}` : ''}`;
+};
+
 const applyDefaultOptionsArgs = (
   [url, requestInit]: FetchArgs,
   defaultOptions?: FetchAXDefaultOptions,
 ): FetchArgs => {
   defaultOptions = mergeOptions(presetOptions, defaultOptions ?? {});
 
-  const requestUrl: URL = defaultOptions?.baseURL
-    ? new URL(url, defaultOptions.baseURL)
-    : new URL(url);
+  const requestUrl = appendParamsToURL(
+    // `baseURL` will be prepended to `url` unless `url` is absolute.
+    buildFullPath(defaultOptions?.baseURL, url),
+    requestInit?.params,
+  );
 
-  const searchParams = new URLSearchParams(requestInit?.params);
-  for (const [key, value] of searchParams) {
-    requestUrl.searchParams.append(key, value);
-  }
-
-  const requestHeaders = new Headers();
+  const requestHeaders: Record<string, string> = {};
   if (defaultOptions?.headers) {
     new Headers(defaultOptions.headers).forEach((value, key) => {
-      requestHeaders.set(key, value);
+      requestHeaders[key] = value;
     });
   }
   if (requestInit?.headers) {
     new Headers(requestInit.headers).forEach((value, key) => {
-      requestHeaders.set(key, value);
+      requestHeaders[key] = value;
     });
   }
 
-  let requestArgs = requestHeaders
-    ? {
-        ...defaultOptions,
-        ...requestInit,
-        headers: requestHeaders,
-      }
-    : { ...defaultOptions, ...requestInit };
+  let requestArgs = {
+    ...defaultOptions,
+    ...requestInit,
+    headers: requestHeaders,
+  };
 
   if (!requestArgs.throwError) {
     requestArgs.throwError = defaultOptions?.throwError
@@ -301,7 +349,7 @@ const fetchAX = {
   create: (defaultOptions?: FetchAXDefaultOptions) => {
     const instance = {
       async get<T = any>(
-        url: string | URL,
+        url: string,
         args?: RequestInit,
       ): Promise<FetchAXResponse<T>> {
         const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
@@ -329,7 +377,7 @@ const fetchAX = {
         return returnResponse;
       },
       async post<T = any>(
-        url: string | URL,
+        url: string,
         data?: BodyInit | Record<string, any>,
         args?: Omit<RequestInit, 'data'>,
       ): Promise<FetchAXResponse<T>> {
@@ -358,7 +406,7 @@ const fetchAX = {
         return returnResponse;
       },
       async put<T = any>(
-        url: string | URL,
+        url: string,
         data?: BodyInit | Record<string, any>,
         args?: Omit<RequestInit, 'data'>,
       ): Promise<FetchAXResponse<T>> {
@@ -388,7 +436,7 @@ const fetchAX = {
         return returnResponse;
       },
       async delete<T = any>(
-        url: string | URL,
+        url: string,
         args?: RequestInit,
       ): Promise<FetchAXResponse<T>> {
         const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
@@ -416,7 +464,7 @@ const fetchAX = {
         return returnResponse;
       },
       async patch<T = any>(
-        url: string | URL,
+        url: string,
         data?: BodyInit | Record<string, any>,
         args?: Omit<RequestInit, 'data'>,
       ): Promise<FetchAXResponse<T>> {
@@ -446,7 +494,7 @@ const fetchAX = {
         return returnResponse;
       },
       async head<T = any>(
-        url: string | URL,
+        url: string,
         args?: RequestInit,
       ): Promise<FetchAXResponse<T>> {
         const [requestUrl, requestArgs] = applyDefaultOptionsArgs(
@@ -476,40 +524,40 @@ const fetchAX = {
     return instance;
   },
   async get<T = any>(
-    url: string | URL,
+    url: string,
     args?: RequestInit,
   ): Promise<FetchAXResponse<T>> {
     return this.create().get(url, args);
   },
   async post<T = any>(
-    url: string | URL,
+    url: string,
     data?: BodyInit | Record<string, any>,
     args?: Omit<RequestInit, 'data'>,
   ): Promise<FetchAXResponse<T>> {
     return this.create().post(url, data, args);
   },
   async put<T = any>(
-    url: string | URL,
+    url: string,
     data?: BodyInit | Record<string, any>,
     args?: Omit<RequestInit, 'data'>,
   ): Promise<FetchAXResponse<T>> {
     return this.create().put(url, data, args);
   },
   async patch<T = any>(
-    url: string | URL,
+    url: string,
     data?: BodyInit | Record<string, any>,
     args?: Omit<RequestInit, 'data'>,
   ): Promise<FetchAXResponse<T>> {
     return this.create().patch(url, data, args);
   },
   async delete<T = any>(
-    url: string | URL,
+    url: string,
     args?: RequestInit,
   ): Promise<FetchAXResponse<T>> {
     return this.create().delete(url, args);
   },
   async head<T = any>(
-    url: string | URL,
+    url: string,
     args?: RequestInit,
   ): Promise<FetchAXResponse<T>> {
     return this.create().head(url, args);
@@ -517,7 +565,7 @@ const fetchAX = {
 };
 export default fetchAX;
 export const presetOptions: FetchAXDefaultOptions = {
-  headers: new Headers([['Content-Type', 'application/json']]),
+  headers: { 'Content-Type': 'application/json' },
 
   throwError: true,
 

@@ -207,6 +207,8 @@ try {
 
 You can intercept requests or responses
 
+For requestInterceptor, the header of requestArgs is restricted to `Record<string,string>`. So we have to use RequestInitReturnedByInterceptor type
+
 ```tsx
 import fetchAX, { RequestInit } from '../src';
 
@@ -215,7 +217,7 @@ const instance = fetchAX.create({
     console.log('default options response interceptor');
     return response;
   },
-  requestInterceptor: (requestArg: RequestInit) => {
+  requestInterceptor: (requestArg: RequestInitReturnedByInterceptor) => {
     console.log('default options reqeust interceptor');
     return requestArg;
   },
@@ -226,10 +228,10 @@ const instance = fetchAX.create({
 default options reqeust interceptor
 requestInit reqeust interceptor
 default options response interceptor
-requestInit response interceptor
+requestInit response interceptor.
  */
 const response = instance.get('/', {
-  requestInterceptor: (requestArg: RequestInit) => {
+  requestInterceptor: (requestArg: RequestInitReturnedByInterceptor) => {
     console.log('requestInit reqeust interceptor');
     return requestArg;
   },
@@ -263,12 +265,12 @@ const instance = fetchAX.create({
 
 ### default options
 
-| Property                    | Description                              | Type                                                  | Default                                             |
-| --------------------------- | ---------------------------------------- | ----------------------------------------------------- | --------------------------------------------------- |
-| baseURL                     | base url                                 | string \| URL                                         | -                                                   |
-| headers                     | fetch headers                            | HeadersInit                                           | new Headers([['Content-Type', 'application/json']]) |
-| throwError                  | whether to throw an error                | boolean                                               | true                                                |
-| responseType                | response type to parse                   | ResponseType                                          | -                                                   |
-| responseInterceptor         | interceptor to be executed on response   | (response: Response) => Response \| Promise<Response> | -                                                   |
-| responseRejectedInterceptor | interceptor to handle rejected responses | (error: any) => any                                   | -                                                   |
-| requestInterceptor          | interceptor to be executed on request    | (requestArg: RequestInit) => RequestInit              | -                                                   |
+| Property                    | Description                              | Type                                                                               | Default                                             |
+| --------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------- |
+| baseURL                     | base url                                 | string \| URL                                                                      | -                                                   |
+| headers                     | fetch headers                            | HeadersInit                                                                        | new Headers([['Content-Type', 'application/json']]) |
+| throwError                  | whether to throw an error                | boolean                                                                            | true                                                |
+| responseType                | response type to parse                   | ResponseType                                                                       | -                                                   |
+| responseInterceptor         | interceptor to be executed on response   | (response: Response) => Response \| Promise<Response>                              | -                                                   |
+| responseRejectedInterceptor | interceptor to handle rejected responses | (error: any) => any                                                                | -                                                   |
+| requestInterceptor          | interceptor to be executed on request    | (requestArg: RequestInitReturnedByInterceptor) => RequestInitReturnedByInterceptor | -                                                   |
