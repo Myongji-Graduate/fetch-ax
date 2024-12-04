@@ -196,7 +196,7 @@ export interface RequestInit extends Omit<globalThis.RequestInit, 'body'> {
   requestInterceptor?: (requestArg: RequestInit) => RequestInit;
   /** Throw Error of fetch. If the throwError attribute is true, throw an error when the status is 300 or more */
   throwError?: boolean;
-  /** data's type */
+  /** Resposne data's type */
   responseType?: ResponseType;
 }
 const isArrayBufferView = (data: any): data is ArrayBufferView => {
@@ -522,8 +522,6 @@ export const presetOptions: FetchAXDefaultOptions = {
   headers: new Headers([['Content-Type', 'application/json']]),
 
   throwError: true,
-
-  responseType: 'json',
 
   // baseURL: ''
 };

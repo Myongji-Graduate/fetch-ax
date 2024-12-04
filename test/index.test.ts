@@ -16,6 +16,13 @@ describe('next-fetch', () => {
   beforeEach(() => {
     fetchMocked = jest.fn().mockResolvedValue({
       body: JSON.stringify(mockResponseData),
+      headers: {
+        get: (header: string) => {
+          if (header === 'Content-Type') {
+            return 'application/json';
+          }
+        },
+      },
       json: jest.fn().mockResolvedValue(mockResponseData),
     });
 
@@ -56,7 +63,6 @@ describe('next-fetch', () => {
         headers: new Headers([['Content-Type', 'application/json']]),
         method: 'GET',
         throwError: true,
-        responseType: 'json',
       },
     );
   });
@@ -83,7 +89,6 @@ describe('next-fetch', () => {
         }),
         method: 'GET',
         throwError: true,
-        responseType: 'json',
       },
     );
   });
@@ -110,7 +115,6 @@ describe('next-fetch', () => {
         headers: new Headers([['Content-Type', 'application/json']]),
         method: 'GET',
         throwError: true,
-        responseType: 'json',
       },
     );
   });
@@ -188,7 +192,6 @@ describe('next-fetch', () => {
         headers: new Headers([['content-type', 'application/json']]),
         method: 'GET',
         throwError: true,
-        responseType: 'json',
         params: {
           id: 1,
         },
