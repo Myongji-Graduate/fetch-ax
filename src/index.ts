@@ -137,8 +137,6 @@ const processReturnResponse = async <T = any>(
   responseType?: ResponseType,
 ): Promise<FetchAXResponse<T>> => {
   const resolvedResponseType = resolveResponseType(response, responseType);
-  if (!resolvedResponseType)
-    return buildFetchAXResponse<T>(response, response.body as T);
 
   try {
     const data = await parseResponseData<T>(response, resolvedResponseType);
