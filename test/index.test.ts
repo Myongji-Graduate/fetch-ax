@@ -6,14 +6,24 @@ describe('next-fetch', () => {
   let mockRequestInterceptor: jest.Mock;
   let mockResponseInterceptor: jest.Mock;
 
+  const mockResponseData = {
+    userId: 1,
+    id: 1,
+    title: 'delectus aut autem',
+    completed: false,
+  };
+
   beforeEach(() => {
     fetchMocked = jest.fn().mockResolvedValue({
-      json: jest.fn().mockResolvedValue({
-        userId: 1,
-        id: 1,
-        title: 'delectus aut autem',
-        completed: false,
-      }),
+      body: JSON.stringify(mockResponseData),
+      headers: {
+        get: (header: string) => {
+          if (header === 'Content-Type') {
+            return 'application/json';
+          }
+        },
+      },
+      json: jest.fn().mockResolvedValue(mockResponseData),
     });
 
     // @ts-ignore
@@ -55,7 +65,6 @@ describe('next-fetch', () => {
         }, // options들은 headers 객체로 한 번 생성되기 때문에 소문자로 변경됨
         method: 'GET',
         throwError: true,
-        responseType: 'json',
       },
     );
   });
@@ -82,7 +91,6 @@ describe('next-fetch', () => {
         },
         method: 'GET',
         throwError: true,
-        responseType: 'json',
       },
     );
   });
@@ -109,7 +117,6 @@ describe('next-fetch', () => {
         headers: { 'content-type': 'application/json' },
         method: 'GET',
         throwError: true,
-        responseType: 'json',
       },
     );
   });
@@ -151,6 +158,24 @@ describe('next-fetch', () => {
     expect(typeof data).toEqual(typeof JSON);
   });
 
+  it('should returns the raw response body due to parsing error', async () => {
+    // given
+    const instance = fetchAX.create({ responseType: 'formdata' });
+    let error;
+    let response;
+    //when
+    try {
+      response = await instance.get(
+        'https://jsonplaceholder.typicode.com/todos/1',
+      );
+    } catch (e) {
+      error = e;
+    }
+    //then
+    expect(error).toEqual(undefined);
+    expect(typeof response?.data).toEqual('string');
+  });
+
   it('should call request with params', async () => {
     // given
     const instance = fetchAX.create();
@@ -169,7 +194,6 @@ describe('next-fetch', () => {
         headers: { 'content-type': 'application/json' },
         method: 'GET',
         throwError: true,
-        responseType: 'json',
         params: {
           id: 1,
         },

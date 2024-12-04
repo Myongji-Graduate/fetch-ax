@@ -270,7 +270,7 @@ const instance = fetchAX.create({
 | baseURL                     | base url                                 | string \| URL                                                                      | -                                                   |
 | headers                     | fetch headers                            | HeadersInit                                                                        | new Headers([['Content-Type', 'application/json']]) |
 | throwError                  | whether to throw an error                | boolean                                                                            | true                                                |
-| responseType                | response type to parse                   | ResponseType                                                                       | json                                                |
+| responseType                | response type to parse                   | ResponseType                                                                       | -                                                   |
 | responseInterceptor         | interceptor to be executed on response   | (response: Response) => Response \| Promise<Response>                              | -                                                   |
 | responseRejectedInterceptor | interceptor to handle rejected responses | (error: any) => any                                                                | -                                                   |
 | requestInterceptor          | interceptor to be executed on request    | (requestArg: RequestInitReturnedByInterceptor) => RequestInitReturnedByInterceptor | -                                                   |
