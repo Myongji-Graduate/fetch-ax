@@ -48,3 +48,11 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public
+
+      - name: Trigger webhook
+        if: steps.check_version.outputs.version_updated == 'true'
+        run: |
+          curl -X POST -H "Accept: application/vnd.github.v3+json" \
+          -H "Authorization: Bearer ${{ secrets.PAT }}" \
+          https://api.github.com/repos/Myongji-Graduate/myongji-graduate-next/dispatches \
+          -d '{"event_type": "fetch-ax-updated"}'
