@@ -60,9 +60,7 @@ describe('next-fetch', () => {
       'https://jsonplaceholder.typicode.com/todos/1',
       //default
       {
-        headers: {
-          'content-type': 'application/json',
-        }, // options들은 headers 객체로 한 번 생성되기 때문에 소문자로 변경됨
+        headers: {}, // options들은 headers 객체로 한 번 생성되기 때문에 소문자로 변경됨
         method: 'GET',
         throwError: true,
       },
@@ -191,7 +189,7 @@ describe('next-fetch', () => {
     expect(fetchMocked).toHaveBeenCalledWith(
       'https://jsonplaceholder.typicode.com/todos/1?id=1',
       {
-        headers: { 'content-type': 'application/json' },
+        headers: {},
         method: 'GET',
         throwError: true,
         params: {

@@ -109,7 +109,7 @@ export type FetchAXDefaultOptions = {
 };
 const parseResponseData = async <T>(
   response: Response,
-  type: ResponseType,
+  type?: ResponseType,
 ): Promise<T> => {
   switch (type) {
     case 'arraybuffer':
@@ -565,8 +565,6 @@ const fetchAX = {
 };
 export default fetchAX;
 export const presetOptions: FetchAXDefaultOptions = {
-  headers: { 'Content-Type': 'application/json' },
-
   throwError: true,
 
   // baseURL: ''
