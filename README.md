@@ -280,8 +280,8 @@ const instance = fetchAX.create({
 
 ##### responseType
 
-- By default, there is no default value for responseType. But it is `json` only if the content-type is `application/json`
+- By default, there is no default value for responseType. But it is set to `json` only if the content-type is `application/json`
 
 ##### headers
 
-- By default, there is no default value for headers. But it's content-type is `application/json` only if the data is `json`
+- By default, there is no default value for headers. But it's content-type is set to `application/json` only if the data is `json`
