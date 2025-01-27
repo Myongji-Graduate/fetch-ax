@@ -166,7 +166,8 @@ The available instance methods are listed below.
 
 ## ✔️ Parsing Response
 
-If you set a response type, you can parse the response with that type. The default type is 'json'.
+If you set a response type, you can parse the response with that type.
+If responseType is not set, the original data is returned. But parsed as `json` only if the content-type is `application/json`.
 
 ```tsx
 const instance = fetchAX.create();
@@ -265,12 +266,22 @@ const instance = fetchAX.create({
 
 ### default options
 
-| Property                    | Description                              | Type                                                                               | Default                                             |
-| --------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------- |
-| baseURL                     | base url                                 | string \| URL                                                                      | -                                                   |
-| headers                     | fetch headers                            | HeadersInit                                                                        | new Headers([['Content-Type', 'application/json']]) |
-| throwError                  | whether to throw an error                | boolean                                                                            | true                                                |
-| responseType                | response type to parse                   | ResponseType                                                                       | -                                                   |
-| responseInterceptor         | interceptor to be executed on response   | (response: Response) => Response \| Promise<Response>                              | -                                                   |
-| responseRejectedInterceptor | interceptor to handle rejected responses | (error: any) => any                                                                | -                                                   |
-| requestInterceptor          | interceptor to be executed on request    | (requestArg: RequestInitReturnedByInterceptor) => RequestInitReturnedByInterceptor | -                                                   |
+| Property                    | Description                              | Type                                                                               | Default |
+| --------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------- | ------- |
+| baseURL                     | base url                                 | string \| URL                                                                      | -       |
+| headers                     | fetch headers                            | HeadersInit                                                                        | -       |
+| throwError                  | whether to throw an error                | boolean                                                                            | true    |
+| responseType                | response type to parse                   | ResponseType                                                                       | -       |
+| responseInterceptor         | interceptor to be executed on response   | (response: Response) => Response \| Promise<Response>                              | -       |
+| responseRejectedInterceptor | interceptor to handle rejected responses | (error: any) => any                                                                | -       |
+| requestInterceptor          | interceptor to be executed on request    | (requestArg: RequestInitReturnedByInterceptor) => RequestInitReturnedByInterceptor | -       |
+
+#### conditional auto default options
+
+##### responseType
+
+- By default, there is no default value for responseType. But it is set to `json` only if the content-type is `application/json`
+
+##### headers
+
+- By default, there is no default value for headers. But it's content-type is set to `application/json` only if the data is `json`

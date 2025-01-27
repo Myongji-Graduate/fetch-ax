@@ -109,7 +109,7 @@ export type FetchAXDefaultOptions = {
 };
 const parseResponseData = async <T>(
   response: Response,
-  type: ResponseType,
+  type?: ResponseType,
 ): Promise<T> => {
   switch (type) {
     case 'arraybuffer':
@@ -204,6 +204,15 @@ export interface RequestInit extends Omit<globalThis.RequestInit, 'body'> {
   /** Resposne data's type */
   responseType?: ResponseType;
 }
+
+const isJson = (data: any) => {
+  try {
+    return typeof JSON.parse(data) === 'object';
+  } catch (e) {
+    return false;
+  }
+};
+
 const isArrayBufferView = (data: any): data is ArrayBufferView => {
   return (
     data &&
@@ -218,17 +227,10 @@ const isArrayBufferView = (data: any): data is ArrayBufferView => {
 };
 
 const isBodyInit = (data: any): data is BodyInit => {
-  const isJson = (data: any) => {
-    try {
-      return typeof JSON.parse(data) === 'object';
-    } catch (e) {
-      return false;
-    }
-  };
   return (
     isJson(data) || // data === 'string' 을 통해서도 JSON인지를 확인할 수 있지만 명시적으로 따지기 위해서
     typeof data === 'string' ||
-    data instanceof ReadableStream ||
+    (typeof ReadableStream !== 'undefined' && data instanceof ReadableStream) ||
     data instanceof Blob ||
     data instanceof ArrayBuffer ||
     data instanceof FormData ||
@@ -288,6 +290,7 @@ const applyDefaultOptionsArgs = (
   );
 
   const requestHeaders: Record<string, string> = {};
+
   if (defaultOptions?.headers) {
     new Headers(defaultOptions.headers).forEach((value, key) => {
       requestHeaders[key] = value;
@@ -297,6 +300,10 @@ const applyDefaultOptionsArgs = (
     new Headers(requestInit.headers).forEach((value, key) => {
       requestHeaders[key] = value;
     });
+  }
+
+  if (requestInit?.data) {
+    appendJsonContentType(requestInit.data, requestHeaders);
   }
 
   let requestArgs = {
@@ -332,6 +339,16 @@ const applyDefaultOptionsArgs = (
 
 function isHttpError(response: Response) {
   return response.status >= 300;
+}
+
+function appendJsonContentType(
+  data: Record<string, any> | BodyInit,
+  requestHeaders: Record<string, string>,
+) {
+  if (isJson(JSON.stringify(data)) && !requestHeaders['content-type']) {
+    requestHeaders['content-type'] = 'application/json';
+  }
+  return requestHeaders;
 }
 
 function ensureBodyInit(data: BodyInit | Record<string, any>): BodyInit {
@@ -565,8 +582,6 @@ const fetchAX = {
 };
 export default fetchAX;
 export const presetOptions: FetchAXDefaultOptions = {
-  headers: { 'Content-Type': 'application/json' },
-
   throwError: true,
 
   // baseURL: ''
